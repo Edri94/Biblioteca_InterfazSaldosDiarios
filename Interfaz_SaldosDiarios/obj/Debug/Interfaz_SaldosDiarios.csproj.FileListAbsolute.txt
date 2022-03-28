@@ -1,0 +1,10 @@
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\bin\Debug\Interfaz_SaldosDiarios.exe.config
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\bin\Debug\Interfaz_SaldosDiarios.exe
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\bin\Debug\Interfaz_SaldosDiarios.pdb
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.csproj.AssemblyReference.cache
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.Form1.resources
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.Properties.Resources.resources
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.csproj.GenerateResource.cache
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.csproj.CoreCompileInputs.cache
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.exe
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.pdb
