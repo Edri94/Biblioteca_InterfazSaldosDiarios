@@ -94,5 +94,53 @@ namespace Biblioteca_InterfazSaldosDiarios.Helpers
 
         }
 
+        public static string Left(string cadena, int posiciones)
+        {
+            return cadena.Substring(0, posiciones);
+        }
+
+
+        public static string Mid(string cadena, int start, int length)
+        {
+            return cadena.Substring(start, length);
+        }
+
+        public static string Right(string cadena, int posiciones)
+        {
+            return cadena.Substring((cadena.Length - posiciones), posiciones);
+        }
+
+        public static string InvierteFecha(string fecha, bool con_hora)
+        {
+            string fecha_invertida = "";
+            fecha = fecha.Replace("/", "-");
+            string[] fecha_dividida = fecha.ToString().Split('-');
+
+            
+
+            if (con_hora)
+            {
+                string tmp_hora = Funcion.Mid(fecha_dividida[2], 5, 2);
+                string tmp_minuto = Funcion.Mid(fecha_dividida[2], 8, 2);
+                string tmp_anio = Funcion.Mid(fecha_dividida[2], 0, 4);
+                string tmp_mes = Int32.Parse(fecha_dividida[1]).ToString("00");
+                string tmp_dia = Int32.Parse(fecha_dividida[0]).ToString("00");
+
+                fecha_invertida = $"{tmp_mes}-{tmp_dia}-{tmp_anio} {tmp_hora}:{tmp_minuto}";
+            }
+            else
+            {
+                string tmp_anio = Funcion.Mid(fecha_dividida[2], 0, 4);
+                string tmp_mes = Int32.Parse(fecha_dividida[1]).ToString("00");
+                string tmp_dia = Int32.Parse(fecha_dividida[0]).ToString("00");
+
+                fecha_invertida = $"{tmp_mes}-{tmp_dia}-{tmp_anio}";
+            }
+           
+
+            return fecha_invertida;
+
+        }
+
     }
 }

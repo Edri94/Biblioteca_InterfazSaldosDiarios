@@ -149,7 +149,7 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
                 Log.Escribe(ex);
 
             }
-
+            dr.Close();
             return maps;
         }
 
@@ -166,10 +166,10 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
 
                 return sqlRecord;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Escribe(ex);
                 return null;
-                throw;
             }
         }
 

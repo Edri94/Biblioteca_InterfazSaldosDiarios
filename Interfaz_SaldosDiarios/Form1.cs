@@ -10,6 +10,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -51,16 +52,26 @@ namespace Interfaz_SaldosDiarios
 
         private void btnCargaSaldos_Click(object sender, EventArgs e)
         {
-            ls_fechaoperacion = txtFechaProceso.Text;     
+            ls_fechaoperacion = txtFechaProceso.Text;
+
+            var reg = new Regex(@"^([0]?[0-9]|[12][0-9]|[3][01])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4}|[0-9]{2})$").Match(ls_fechaoperacion).Success;
             
-            if(main.msDSN400 == "" || main.msUser400 == "" || main.msPswd400 == "" || main.msLibAS400 == "")
+            if(!reg)
+            {
+                Message("El formato de la fecha de proceso esta mal. El formato correcto es dd-MM-yyyy");
+                return;
+            }
+
+            if (main.msDSN400 == "" || main.msUser400 == "" || main.msPswd400 == "" || main.msLibAS400 == "")
             {
                 Message("Verifique el archivo de inicio. Faltan datos para la conexion con AS400");
+                return;
             }
 
             if (main.msDBSrvr == "" || main.msDBuser == "" || main.msDBPswd == "" || main.msDBName == "")
             {
                 Message("Verifique el archivo de inicio. Faltan datos para la conexion con con SQL Server");
+                return;
             }
 
             mnFirstTime = 1;
@@ -72,14 +83,14 @@ namespace Interfaz_SaldosDiarios
                 Message("En linea...");
                 Message("Calculando fecha de los archivos a recuperar...");
 
-                if(CakculaFechaArchivos())
+                if(CalculaFechaArchivos())
                 {
 
                 }
             }
         }
 
-        private bool CakculaFechaArchivos()
+        private bool CalculaFechaArchivos()
         {
             bool CalculaFechaArchivos = false;
             string ls_FechaDiaActual;
@@ -93,12 +104,60 @@ namespace Interfaz_SaldosDiarios
             {
                 //Obtiene la fecha del servidor SQL
                 lsQuery = "SELECT CONVERT(VARCHAR,DATEPART(dd, getdate()),2)+'/'+CONVERT(VARCHAR,DATEPART(month, getdate()),2)+'/'+CONVERT(VARCHAR,DATEPART(yy, getdate()),2)";
-                SqlDataReader dr =  bd.ejecutarConsulta(lsQuery);
+                SqlDataReader dr = bd.ejecutarConsulta(lsQuery);
 
                 List<Map> maps = new List<Map>();
-                maps.Add(new Map { Key = "Fecha_Actual", Type ="string" });
-
+                maps.Add(new Map { Key = "Fecha_Actual", Type = "string" });
                 maps = bd.LLenarMapToQuery(maps, dr);
+
+               
+                ls_FechaDiaActual = Funcion.InvierteFecha(maps[0].Value.ToString(), false);
+                main.Fecha_Int =DateTime.Parse(ls_fechaoperacion).ToString("MM-dd-yy");
+
+                //Verifica si hoy es festivo...
+                string tmp_fecha = DateTime.Parse(ls_fechaoperacion).ToString("yyyy-MM-dd") + " 00:00:00.000";
+                lsQuery = "SELECT COUNT(*) FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '" + tmp_fecha + "'";
+                
+                dr = bd.ejecutarConsulta(lsQuery);
+                maps = new List<Map>();
+                maps.Add(new Map { Key = "Dias_Feriados", Type = "int" });
+                maps = bd.LLenarMapToQuery(maps, dr);
+
+                if(Int32.Parse(maps[0].Value.ToString()) != 0)
+                {
+                    //Inicializamos el tipo día feriado
+                    TipoFecha = "3";
+                    lsQuery = "SELECT  CAST(ISNULL(tipo_dia_feriado, 3) AS INT) as [tipo_dia_feriado] FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '" + tmp_fecha + "'";
+
+                    dr = bd.ejecutarConsulta(lsQuery);
+                    maps = new List<Map>();
+                    maps.Add(new Map { Key = "tipo_dia_feriado", Type = "int" });
+                    maps = bd.LLenarMapToQuery(maps, dr);
+
+                    TipoFecha = maps[0].Value.ToString();
+
+                    // Si es festivo en Houston o es sábado o Domingo, calcula el día hábil siguiente en la agencia
+                    if (TipoFecha != "")
+                    {
+                        //Si es día festivo en Houston, obtiene día hábil siguiente
+                        if(TipoFecha == "2" || TipoFecha == "3")
+                        {
+                            DiasAgregados = 1;
+                            tempDiasFeriados = 1;
+
+                            do
+                            {
+                                DateTime tmp_fecha_invertida = DateTime.Parse(Funcion.InvierteFecha(ls_FechaDiaActual, false));
+                                ls_fechaoperacion = Funcion.InvierteFecha(tmp_fecha_invertida.AddDays(DiasAgregados).ToString("dd-MM-yyyy"), false);
+
+                                //Calcula día habil siguiente con base en a CATALOGOS..DIAS FERIADOS
+                                lsQuery = "SELECT COUNT(1) FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '" + ls_fechaoperacion + "' and tipo_dia_feriado in(2, 3)";
+
+                            } while (tempDiasFeriados != 0);
+                        }
+                    }
+
+                }
 
             }
             catch (Exception ex)
