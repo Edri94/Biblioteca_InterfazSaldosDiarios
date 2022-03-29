@@ -42,17 +42,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Data\ConexionBD.cs" />
     <Compile Include="Data\FuncionesBD.cs" />
     <Compile Include="Helpers\Encriptacion.cs" />
     <Compile Include="Helpers\Funcion.cs" />
     <Compile Include="Helpers\Log.cs" />
+    <Compile Include="Models\Saldos.cs" />
+    <Compile Include="Models\Vencim.cs" />
+    <Compile Include="Processes\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Processes\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

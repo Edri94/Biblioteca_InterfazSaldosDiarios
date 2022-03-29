@@ -79,5 +79,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Biblioteca_InterfazSaldosDiarios\Biblioteca_InterfazSaldosDiarios.csproj">
+      <Project>{d128104f-0757-4320-a31f-fe97d1724952}</Project>
+      <Name>Biblioteca_InterfazSaldosDiarios</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

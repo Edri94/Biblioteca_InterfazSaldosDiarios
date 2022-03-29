@@ -8,32 +8,32 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
 {
     public class Main
     {
-        string gsFechaSQL;
-        string pass_enc;
-        string pass_desc;
-        string SQLpwd;
-
-        //Variables para la conexion con AS/400
-        string msDSN400;
-        string msLibAS400;
-        string msUser400;
-        string msPswd400;
-
-        //Variables para la conexion con la base de datos
-        string msDBuser;
-        string msDBPswd;
-        string msDBName;
-        string msDBSrvr;
-
-        //Variables para recuperacion de archivos de saldos y vencimientos
-        string FileSaldoHO;
-        string FileVenciHO;
-
-        //Opciones de operacion
-        string Bandera;
-        string Reintentos;
-
-        string Fecha_Int;
+        public string gsFechaSQL;
+        public string pass_enc;
+        public string pass_desc;
+        public string SQLpwd;
+         
+         //Variables para la conexion con AS/400
+        public string msDSN400;
+        public string msLibAS400;
+        public string msUser400;
+        public string msPswd400;
+         
+         //Variables para la conexion con la base de datos
+        public string msDBuser;
+        public string msDBPswd;
+        public string msDBName;
+        public string msDBSrvr;
+         
+         //Variables para recuperacion de archivos de saldos y vencimientos
+        public string FileSaldoHO;
+        public string FileVenciHO;
+         
+         //Opciones de operacion
+        public string Bandera;
+        public string Reintentos;
+         
+        public string Fecha_Int;
 
 
     }

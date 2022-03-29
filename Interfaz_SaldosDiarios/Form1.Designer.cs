@@ -59,6 +59,7 @@ namespace Interfaz_SaldosDiarios
             this.txtFechaArchivos = new System.Windows.Forms.TextBox();
             this.btnCargaSaldos = new System.Windows.Forms.Button();
             this.btnSalir = new System.Windows.Forms.Button();
+            this.txtConsola = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -341,16 +342,31 @@ namespace Interfaz_SaldosDiarios
             this.btnSalir.Text = "Salir";
             this.btnSalir.UseVisualStyleBackColor = true;
             // 
+            // txtConsola
+            // 
+            this.txtConsola.BackColor = System.Drawing.SystemColors.MenuText;
+            this.txtConsola.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtConsola.ForeColor = System.Drawing.Color.LawnGreen;
+            this.txtConsola.Location = new System.Drawing.Point(12, 595);
+            this.txtConsola.Multiline = true;
+            this.txtConsola.Name = "txtConsola";
+            this.txtConsola.ReadOnly = true;
+            this.txtConsola.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtConsola.Size = new System.Drawing.Size(669, 100);
+            this.txtConsola.TabIndex = 3;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(693, 586);
+            this.ClientSize = new System.Drawing.Size(693, 707);
+            this.Controls.Add(this.txtConsola);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
             this.Text = "Interfaz Saldos EQ";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -358,6 +374,7 @@ namespace Interfaz_SaldosDiarios
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -393,6 +410,7 @@ namespace Interfaz_SaldosDiarios
         private System.Windows.Forms.TextBox txtFechaArchivos;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.TextBox txtConsola;
     }
 }
 

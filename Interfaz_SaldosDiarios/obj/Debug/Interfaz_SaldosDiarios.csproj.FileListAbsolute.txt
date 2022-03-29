@@ -8,3 +8,6 @@ C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDi
 C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.csproj.CoreCompileInputs.cache
 C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.exe
 C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.pdb
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\bin\Debug\Biblioteca_InterfazSaldosDiarios.dll
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\bin\Debug\Biblioteca_InterfazSaldosDiarios.pdb
+C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Interfaz_SaldosDiarios\obj\Debug\Interfaz_SaldosDiarios.csproj.CopyComplete
