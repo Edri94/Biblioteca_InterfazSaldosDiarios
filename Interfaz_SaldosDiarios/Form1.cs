@@ -70,7 +70,43 @@ namespace Interfaz_SaldosDiarios
             if(EstableceConexion())
             {
                 Message("En linea...");
+                Message("Calculando fecha de los archivos a recuperar...");
+
+                if(CakculaFechaArchivos())
+                {
+
+                }
             }
+        }
+
+        private bool CakculaFechaArchivos()
+        {
+            bool CalculaFechaArchivos = false;
+            string ls_FechaDiaActual;
+            string lsQuery;
+            string TipoFecha;
+            int DiasAgregados;
+            int tempDiasFeriados;
+            int lnEsDíaFeriado;
+
+            try
+            {
+                //Obtiene la fecha del servidor SQL
+                lsQuery = "SELECT CONVERT(VARCHAR,DATEPART(dd, getdate()),2)+'/'+CONVERT(VARCHAR,DATEPART(month, getdate()),2)+'/'+CONVERT(VARCHAR,DATEPART(yy, getdate()),2)";
+                SqlDataReader dr =  bd.ejecutarConsulta(lsQuery);
+
+                List<Map> maps = new List<Map>();
+                maps.Add(new Map { Key = "Fecha_Actual", Type ="string" });
+
+                maps = bd.LLenarMapToQuery(maps, dr);
+
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+                CalculaFechaArchivos = false;
+            }
+            return CalculaFechaArchivos;
         }
 
         private bool EstableceConexion()

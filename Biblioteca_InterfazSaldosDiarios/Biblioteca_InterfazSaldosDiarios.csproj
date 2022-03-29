@@ -47,6 +47,7 @@
     <Compile Include="Helpers\Encriptacion.cs" />
     <Compile Include="Helpers\Funcion.cs" />
     <Compile Include="Helpers\Log.cs" />
+    <Compile Include="Models\Map.cs" />
     <Compile Include="Models\Saldos.cs" />
     <Compile Include="Models\Vencim.cs" />
     <Compile Include="Processes\Main.cs" />

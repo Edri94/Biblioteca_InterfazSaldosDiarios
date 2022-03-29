@@ -1,4 +1,5 @@
 ﻿using Biblioteca_InterfazSaldosDiarios.Helpers;
+using Biblioteca_InterfazSaldosDiarios.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -117,6 +118,39 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
             }
 
             return 1;
+        }
+
+        public List<Map> LLenarMapToQuery(List<Map> maps, SqlDataReader dr)
+        {
+            try
+            {
+                int i = 0;
+                while(dr.Read())
+                {
+                    switch(maps[i].Type)
+                    {
+                        case "string":
+                            maps[i].Value = dr.GetString(i);
+                        break;
+                        
+                        case "int":
+                            maps[i].Value = dr.GetInt32(i);
+                        break;
+                       
+                        default:
+                            maps[i].Value = dr.GetString(i);
+                        break;
+                    }
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+
+            }
+
+            return maps;
         }
 
         public SqlDataReader ejecutarConsulta(string query)
