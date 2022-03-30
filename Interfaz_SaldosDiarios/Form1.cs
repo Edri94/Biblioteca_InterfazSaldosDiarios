@@ -25,8 +25,8 @@ namespace Interfaz_SaldosDiarios
      
         string msSQL;
         string msSQL400;
-        string mnBanderaSHO;
-        string mnBanderaVHO;
+        int mnBanderaSHO;
+        int mnBanderaVHO;
         string msPathFile;
 
         Saldos[] maSaldos;
@@ -85,9 +85,58 @@ namespace Interfaz_SaldosDiarios
 
                 if(CalculaFechaArchivos())
                 {
-
+                    txtFechaArchivos.Text = ls_fechaoperacion;
+                    mnBanderaSHO = 0;
+                    mnBanderaVHO = 0;
+                    RecibeArchivos();
                 }
             }
+        }
+
+        private void RecibeArchivos()
+        {
+            pgbrCargaSaldos.Value = 5;
+            if(mnBanderaSHO == 0)
+            {
+                Message("Carga de saldos completa...");
+                
+                if(!ActValorTransfer(1, 1))
+                {
+                   
+                }
+            }
+        }
+
+        private bool ActValorTransfer(int status, int tipo_bandera)
+        {
+            bool ActValorTransfer = false;
+            
+            try
+            {
+                string ls_QueryActualiza = "UPDATE PARAMETROS SET ";
+
+                switch(tipo_bandera)
+                {
+                    case 1:
+                        ls_QueryActualiza = ls_QueryActualiza + "transfer_saldos_ho = " + status;
+                    break;
+                    case 2:
+                        ls_QueryActualiza = ls_QueryActualiza + "transfer_venc_ho = " + status;
+                    break;
+                    case 3:
+                        ls_QueryActualiza = ls_QueryActualiza + "transfer_saldos_ho = " + status + ", transfer_venc_ho = " + status;
+                    break;
+                }
+                //ejecutar consulta aqui
+                ActValorTransfer = true;
+
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+            }
+
+            return ActValorTransfer;
         }
 
         private bool CalculaFechaArchivos()
@@ -116,7 +165,7 @@ namespace Interfaz_SaldosDiarios
 
                 //Verifica si hoy es festivo...
                 string tmp_fecha = DateTime.Parse(ls_fechaoperacion).ToString("yyyy-MM-dd") + " 00:00:00.000";
-                lsQuery = "SELECT COUNT(*) FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '" + tmp_fecha + "'";
+                lsQuery = $"SELECT COUNT(*) FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '{tmp_fecha}'";
                 
                 dr = bd.ejecutarConsulta(lsQuery);
                 maps = new List<Map>();
@@ -127,7 +176,7 @@ namespace Interfaz_SaldosDiarios
                 {
                     //Inicializamos el tipo día feriado
                     TipoFecha = "3";
-                    lsQuery = "SELECT  CAST(ISNULL(tipo_dia_feriado, 3) AS INT) as [tipo_dia_feriado] FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '" + tmp_fecha + "'";
+                    lsQuery = $"SELECT  CAST(ISNULL(tipo_dia_feriado, 3) AS INT) as [tipo_dia_feriado] FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '{tmp_fecha}'";
 
                     dr = bd.ejecutarConsulta(lsQuery);
                     maps = new List<Map>();
@@ -148,16 +197,30 @@ namespace Interfaz_SaldosDiarios
                             do
                             {
                                 DateTime tmp_fecha_invertida = DateTime.Parse(Funcion.InvierteFecha(ls_FechaDiaActual, false));
-                                ls_fechaoperacion = Funcion.InvierteFecha(tmp_fecha_invertida.AddDays(DiasAgregados).ToString("dd-MM-yyyy"), false);
+                                //ls_fechaoperacion = Funcion.InvierteFecha(tmp_fecha_invertida.AddDays(DiasAgregados).ToString("dd-MM-yyyy"), false);
+                                ls_fechaoperacion = tmp_fecha_invertida.AddDays(DiasAgregados).ToString("dd-MM-yyyy");
 
                                 //Calcula día habil siguiente con base en a CATALOGOS..DIAS FERIADOS
-                                lsQuery = "SELECT COUNT(1) FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '" + ls_fechaoperacion + "' and tipo_dia_feriado in(2, 3)";
+                                tmp_fecha = DateTime.Parse(ls_fechaoperacion).ToString("yyyy-MM-dd") + " 00:00:00.000";
+                                lsQuery = $"SELECT COUNT(1) as [dias] FROM CATALOGOS..DIAS_FERIADOS WHERE fecha = '{tmp_fecha}' and tipo_dia_feriado in(2, 3)";
+
+                                dr = bd.ejecutarConsulta(lsQuery);
+                                maps = new List<Map>();
+                                maps.Add(new Map { Key = "dias", Type = "int" });
+                                maps = bd.LLenarMapToQuery(maps, dr);
+                                tempDiasFeriados = Int32.Parse(maps[0].Value.ToString());
+
+                                DiasAgregados = DiasAgregados + 1;
+
 
                             } while (tempDiasFeriados != 0);
                         }
                     }
 
                 }
+
+                gsFechaArchivo = ls_fechaoperacion;
+                CalculaFechaArchivos = true;
 
             }
             catch (Exception ex)
