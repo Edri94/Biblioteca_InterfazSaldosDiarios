@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\ConexionAS400.cs" />
     <Compile Include="Data\ConexionBD.cs" />
     <Compile Include="Data\FuncionesBD.cs" />
     <Compile Include="Helpers\Encriptacion.cs" />

@@ -125,23 +125,23 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
             try
             {
                 int i = 0;
-                while(dr.Read())
+                while (dr.Read())
                 {
-                    switch(maps[i].Type)
+                    switch (maps[i].Type)
                     {
                         case "string":
                             maps[i].Value = dr.GetString(i);
-                        break;
-                        
+                            break;
+
                         case "int":
                             maps[i].Value = dr.GetInt32(i);
-                        break;
-                       
+                            break;
+
                         default:
                             maps[i].Value = dr.GetString(i);
-                        break;
+                            break;
                     }
-                    
+
                 }
             }
             catch (Exception ex)
@@ -173,6 +173,50 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
             }
         }
 
+        public SqlDataReader ejecutarConsultaParametros(string query, SqlParameter[] sqlParameters)
+        {
+            SqlDataReader sqlRecord;
+            try
+            {
+                cnnConexion.ActiveConnection = true;
+                cnnConexion.ParametersContains = true;
+                cnnConexion.CommandType = CommandType.Text;
+                cnnConexion.ActiveConnection = true;
+                cnnConexion.AddParameters(sqlParameters);
+
+                sqlRecord = cnnConexion.ExecuteDataReader(query);
+
+                return sqlRecord;
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+                return null;
+            }
+
+        }
+
+        public int ejecutarActualizacionParametros(string query, SqlParameter[] sqlParameters)
+        {
+            int afectados = 0;
+            try
+            {
+                cnnConexion.ActiveConnection = true;
+                cnnConexion.ParametersContains = true;
+                cnnConexion.CommandType = CommandType.Text;
+                cnnConexion.ActiveConnection = true;
+                cnnConexion.AddParameters(sqlParameters);
+
+                afectados = cnnConexion.ExecuteNonQuery(query);
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+            }
+
+            return afectados;
+
+        }
     }
 
 
