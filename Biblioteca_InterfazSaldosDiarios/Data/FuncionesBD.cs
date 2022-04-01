@@ -124,33 +124,37 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
         {
             try
             {
-                int i = 0;
-                while (dr.Read())
+                if (dr.FieldCount == 1)
                 {
-                    switch (maps[i].Type)
+                    while (dr.Read())
                     {
-                        case "string":
-                            maps[i].Value = dr.GetString(i);
-                            break;
+                        switch (maps[0].Type)
+                        {
+                            case "string":
+                                maps[0].Value = dr.GetString(0);
+                                break;
 
-                        case "int":
-                            maps[i].Value = dr.GetInt32(i);
-                            break;
+                            case "int":
+                                maps[0].Value = dr.GetInt32(0);
+                                break;
 
-                        default:
-                            maps[i].Value = dr.GetString(i);
-                            break;
-                    }
+                            default:
+                                maps[0].Value = dr.GetString(0);
+                                break;
+                        }
 
+                    }                
                 }
+                dr.Close();
+                return maps;
             }
             catch (Exception ex)
             {
                 Log.Escribe(ex);
-
+                dr.Close();
+                return null;
             }
-            dr.Close();
-            return maps;
+                
         }
 
         public SqlDataReader ejecutarConsulta(string query)

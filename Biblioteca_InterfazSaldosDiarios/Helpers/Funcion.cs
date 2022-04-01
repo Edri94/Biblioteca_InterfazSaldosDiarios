@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Biblioteca_InterfazSaldosDiarios.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -142,5 +143,17 @@ namespace Biblioteca_InterfazSaldosDiarios.Helpers
 
         }
 
+        public static string Space(int n_espacios)
+        {
+            char espacio = ' ';
+            string cadena = "";
+
+            for (int i = 0; i < n_espacios; i++)
+            {
+                cadena +=  espacio;
+            }
+
+            return cadena;
+        }
     }
 }

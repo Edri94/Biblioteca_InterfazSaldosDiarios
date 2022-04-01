@@ -11,11 +11,11 @@ namespace Biblioteca_InterfazSaldosDiarios.Models
         public string Agencia { get; set; }
         public string NumCuenta { get; set; }
         public string SufijoCuenta { get; set; }
-        public string SaldoIniDia { get; set; }
-        public string InteresDia { get; set; }
+        public float SaldoIniDia { get; set; }
+        public int InteresDia { get; set; }
         public string SwitchBloqueo { get; set; }
         public string FechaGenSaldo { get; set; }
-        public string NumRegistros { get; set; }
+        public int NumRegistros { get; set; }
         public string FinRegistro { get; set; }
     }
 }

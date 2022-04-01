@@ -31,8 +31,8 @@ namespace Interfaz_SaldosDiarios
         int mnBanderaVHO;
         string msPathFile;
 
-        Saldos[] maSaldos;
-        Vencim[] maVencimientos;
+        List<Saldos> maSaldos;
+        List<Vencim> maVencimientos;
 
         string gsFechaArchivo;
         string ls_fechaoperacion;
@@ -142,11 +142,15 @@ namespace Interfaz_SaldosDiarios
 
                 OdbcDataReader dr = as400.EjecutaSelect(msSQL400);
 
-                List<Map> maps = new List<Map>();
-                maps.Add(new Map { Key = "cuenta", Type = "int" });
-                maps = as400.LLenarMapToQuery(maps, dr);
+                
 
-                lnNumRegistros = maps[0].GetIn32();
+                List<List<Map>> maps = new List<List<Map>>();
+                List<Map> mapa_definicion = new List<Map>();
+
+                mapa_definicion.Add(new Map { Key = "cuenta", Type = "int" });
+                maps = as400.LLenarMapToQuery(mapa_definicion, dr);
+
+                lnNumRegistros = maps[0][0].GetIn32();
                 lnContador = 0;
                 lnDatos = 0;
 
@@ -168,35 +172,73 @@ namespace Interfaz_SaldosDiarios
                     {
                         case 1:
                             msSQL400 = $"Select SDAB, SDAN, SDAS, SDBAL, SDINT , SDAI17, SDDTE1, SDNREG, SDFIN FROM {main.msLibAS400}.{lsArchivoAS400}";
-                            maps = new List<Map>();
-                            maps.Add(new Map { Key = "SDAB", Type = "int" });
-                            maps.Add(new Map { Key = "SDAN", Type = "int" });
-                            maps.Add(new Map { Key = "SDAS", Type = "int" });
-                            maps.Add(new Map { Key = "SDBAL", Type = "int" });
-                            maps.Add(new Map { Key = "SDINT", Type = "int" });
-                            maps.Add(new Map { Key = "SDAI17", Type = "int" });
-                            maps.Add(new Map { Key = "SDDTE1", Type = "int" });
-                            maps.Add(new Map { Key = "SDNREG", Type = "int" });
-                            maps.Add(new Map { Key = "SDFIN", Type = "int" });
+                            mapa_definicion = new List<Map>();
+                            mapa_definicion.Add(new Map { Key = "SDAB", Type = "string" });
+                            mapa_definicion.Add(new Map { Key = "SDAN", Type = "string" });
+                            mapa_definicion.Add(new Map { Key = "SDAS", Type = "string" });
+                            mapa_definicion.Add(new Map { Key = "SDBAL", Type = "float" });
+                            mapa_definicion.Add(new Map { Key = "SDINT", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "SDAI17", Type = "string" });
+                            mapa_definicion.Add(new Map { Key = "SDDTE1", Type = "string" });
+                            mapa_definicion.Add(new Map { Key = "SDNREG", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "SDFIN", Type = "string" });
                         break;
                         case 2:
                             msSQL400 = $"Select CDDLR, CDAB, CDAN, CDAS, CDDLR, CDAB, CDAN, CDAS, CDFIN FROM {main.msLibAS400}.{lsArchivoAS400}";
-                            maps.Add(new Map { Key = "CDDLR", Type = "int" });
-                            maps.Add(new Map { Key = "CDAB", Type = "int" });
-                            maps.Add(new Map { Key = "CDAN", Type = "int" });
-                            maps.Add(new Map { Key = "CDAS", Type = "int" });
-                            maps.Add(new Map { Key = "CDDLR", Type = "int" });
-                            maps.Add(new Map { Key = "CDAB", Type = "int" });
-                            maps.Add(new Map { Key = "CDAN", Type = "int" });
-                            maps.Add(new Map { Key = "CDAS", Type = "int" });
-                            maps.Add(new Map { Key = "CDFIN", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDDLR", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDAB", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDAN", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDAS", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDDLR", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDAB", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDAN", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDAS", Type = "int" });
+                            mapa_definicion.Add(new Map { Key = "CDFIN", Type = "int" });
                         break;
                     }
 
+
+                    //Busca los registros por procesar
                     dr = as400.EjecutaSelect(msSQL400);
+                    maps = as400.LLenarMapToQuery(mapa_definicion, dr);
+
+                    if(maps != null)
+                    {
+                        maSaldos = new List<Saldos>();
+
+                        if (maps.Count == lnNumRegistros)
+                        {
+                            for(int fila = 0; fila < lnNumRegistros; fila++)
+                            {
+                                switch (TipoInfo)
+                                {
+                                    case 1:
+
+                                        Saldos saldo = new Saldos { 
+                                            Agencia = Funcion.Left(maps[fila][0].GetString() + Funcion.Space(4), 4),
+                                            NumCuenta = "",
+                                            SufijoCuenta = "",
+                                            SaldoIniDia = 0,
+                                            InteresDia  = 0,
+                                            SwitchBloqueo = "",
+                                            FechaGenSaldo = "",
+                                            NumRegistros = 0,
+                                            FinRegistro = ""
+
+                                        };
+                                         maSaldos.Add(saldo);
+
+
+                                    break;
+                                }
+                            }
+                            
+                        }
+                    }
+                    
 
                     
-                    maps = as400.LLenarMapToQuery(maps, dr);
+
                 }
 
 
