@@ -147,6 +147,58 @@ namespace Interfaz_SaldosDiarios
                 maps = as400.LLenarMapToQuery(maps, dr);
 
                 lnNumRegistros = maps[0].GetIn32();
+                lnContador = 0;
+                lnDatos = 0;
+
+                switch (TipoInfo)
+                {
+                    case 1:
+                        lblNumSaldosHO.Text = "Registros a procesar : " + lnNumRegistros;
+                        pgbrCargaSaldos.Value = 10;
+                    break;
+                    case 2:
+                        lblNumVencimHO.Text = "Registros a procesar : " + lnNumRegistros;
+                        pgbrCargaVencimientos.Value = 10;
+                    break;
+                }
+                
+                if(lnNumRegistros > 0)
+                {
+                    switch (TipoInfo)
+                    {
+                        case 1:
+                            msSQL400 = $"Select SDAB, SDAN, SDAS, SDBAL, SDINT , SDAI17, SDDTE1, SDNREG, SDFIN FROM {main.msLibAS400}.{lsArchivoAS400}";
+                            maps = new List<Map>();
+                            maps.Add(new Map { Key = "SDAB", Type = "int" });
+                            maps.Add(new Map { Key = "SDAN", Type = "int" });
+                            maps.Add(new Map { Key = "SDAS", Type = "int" });
+                            maps.Add(new Map { Key = "SDBAL", Type = "int" });
+                            maps.Add(new Map { Key = "SDINT", Type = "int" });
+                            maps.Add(new Map { Key = "SDAI17", Type = "int" });
+                            maps.Add(new Map { Key = "SDDTE1", Type = "int" });
+                            maps.Add(new Map { Key = "SDNREG", Type = "int" });
+                            maps.Add(new Map { Key = "SDFIN", Type = "int" });
+                        break;
+                        case 2:
+                            msSQL400 = $"Select CDDLR, CDAB, CDAN, CDAS, CDDLR, CDAB, CDAN, CDAS, CDFIN FROM {main.msLibAS400}.{lsArchivoAS400}";
+                            maps.Add(new Map { Key = "CDDLR", Type = "int" });
+                            maps.Add(new Map { Key = "CDAB", Type = "int" });
+                            maps.Add(new Map { Key = "CDAN", Type = "int" });
+                            maps.Add(new Map { Key = "CDAS", Type = "int" });
+                            maps.Add(new Map { Key = "CDDLR", Type = "int" });
+                            maps.Add(new Map { Key = "CDAB", Type = "int" });
+                            maps.Add(new Map { Key = "CDAN", Type = "int" });
+                            maps.Add(new Map { Key = "CDAS", Type = "int" });
+                            maps.Add(new Map { Key = "CDFIN", Type = "int" });
+                        break;
+                    }
+
+                    dr = as400.EjecutaSelect(msSQL400);
+
+                    
+                    maps = as400.LLenarMapToQuery(maps, dr);
+                }
+
 
             }
             catch (Exception ex)
