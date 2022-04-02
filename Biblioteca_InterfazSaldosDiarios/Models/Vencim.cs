@@ -12,10 +12,10 @@ namespace Biblioteca_InterfazSaldosDiarios.Models
         public string Agencia { get; set; }
         public string NumCuenta { get; set; }
         public string SufijoCuenta { get; set; }
-        public string Saldo { get; set; }
-        public string FechaVen { get; set; }
-        public string NumRegistros { get; set; }
-        public string Intereses { get; set; }
+        public float Saldo { get; set; }
+        public DateTime FechaVen { get; set; }
+        public int NumRegistros { get; set; }
+        public float Intereses { get; set; }
         public string FinRegistro { get; set; }
     }
 }

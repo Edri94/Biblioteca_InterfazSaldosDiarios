@@ -111,14 +111,10 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
         /// <param name="maps">definicion del mapa</param>
         /// <param name="dr">OdbcDataReader de la consulta</param>
         /// <returns></returns>
-        public List<List<Map>> LLenarMapToQuery(List<Map> maps, OdbcDataReader dr)
+        public List<Map> LLenarMapToQuery(List<Map> maps, OdbcDataReader dr)
         {
-
-            List<List<Map>> lista = new List<List<Map>>();
-            int fila = 0;
             try
             {
-                fila = 0;
                 while (dr.Read())
                 {
                     if (dr.FieldCount == 1)
@@ -132,55 +128,20 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
                             case "int":
                                 maps[0].Value = dr.GetInt32(0);
                                 break;
-
-                            default:
-                                maps[0].Value = dr.GetString(0);
-                                break;
                         }
 
                     }
-                    else if(dr.FieldCount > 1)
-                    {
-                        for(int columna = 0; columna < dr.FieldCount; columna++)
-                        {
-                            switch (maps[columna].Type)
-                            {
-                                case "string":
-                                    maps[columna].Value = dr.GetString(columna);
-                                    break;
-
-                                case "int":
-                                    maps[columna].Value = dr.GetInt32(columna);
-                                    break;
-                                
-                                case "float":
-                                    maps[columna].Value = dr.GetFloat(columna);
-                                    break;
-
-                                default:
-                                    maps[columna].Value = dr.GetString(columna);
-                                    break;
-                            }
-                        }
-                    }
-                    lista.Add(maps);
-                    fila++;
                 }
                 dr.Close();
 
-                return lista;
+                return maps;
             }
             catch (Exception ex)
             {
                 dr.Close();
-                Log.Escribe($"Error er la fila {fila}", "Error");
                 Log.Escribe(ex);
                 return null;
-            }
-            
-           
+            }        
         }
-
-        
     }
 }

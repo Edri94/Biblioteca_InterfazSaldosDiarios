@@ -48,5 +48,18 @@ namespace Biblioteca_InterfazSaldosDiarios.Models
                 return 0;
             }
         }
+
+        public float GetFloat()
+        {
+            object a = Value;
+            if (Value.GetType().Name == "Single")
+            {
+                return float.Parse(Value.ToString());
+            }
+            else
+            {
+                return 0;
+            }
+        }
     }
 }

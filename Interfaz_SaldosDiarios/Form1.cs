@@ -115,9 +115,9 @@ namespace Interfaz_SaldosDiarios
 
         private bool ProcesaInfo(int TipoInfo)
         {
-            long lnDatos;
-            long lnContador;
-            long lnNumRegistros;
+            int lnDatos;
+            int lnContador;
+            int lnNumRegistros;
             string lsArchivoAS400 = "";
 
             bool ProcesaInfo = false;
@@ -142,15 +142,13 @@ namespace Interfaz_SaldosDiarios
 
                 OdbcDataReader dr = as400.EjecutaSelect(msSQL400);
 
-                
 
-                List<List<Map>> maps = new List<List<Map>>();
-                List<Map> mapa_definicion = new List<Map>();
+                List<Map> mapa_cuenta = new List<Map>();
+                mapa_cuenta.Add(new Map { Key = "cuenta", Type = "int" });
+                mapa_cuenta = as400.LLenarMapToQuery(mapa_cuenta, dr);
 
-                mapa_definicion.Add(new Map { Key = "cuenta", Type = "int" });
-                maps = as400.LLenarMapToQuery(mapa_definicion, dr);
+                lnNumRegistros = mapa_cuenta[0].GetIn32();
 
-                lnNumRegistros = maps[0][0].GetIn32();
                 lnContador = 0;
                 lnDatos = 0;
 
@@ -165,83 +163,104 @@ namespace Interfaz_SaldosDiarios
                         pgbrCargaVencimientos.Value = 10;
                     break;
                 }
-                
-                if(lnNumRegistros > 0)
+
+                if (lnNumRegistros > 0)
                 {
                     switch (TipoInfo)
                     {
                         case 1:
                             msSQL400 = $"Select SDAB, SDAN, SDAS, SDBAL, SDINT , SDAI17, SDDTE1, SDNREG, SDFIN FROM {main.msLibAS400}.{lsArchivoAS400}";
-                            mapa_definicion = new List<Map>();
-                            mapa_definicion.Add(new Map { Key = "SDAB", Type = "string" });
-                            mapa_definicion.Add(new Map { Key = "SDAN", Type = "string" });
-                            mapa_definicion.Add(new Map { Key = "SDAS", Type = "string" });
-                            mapa_definicion.Add(new Map { Key = "SDBAL", Type = "float" });
-                            mapa_definicion.Add(new Map { Key = "SDINT", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "SDAI17", Type = "string" });
-                            mapa_definicion.Add(new Map { Key = "SDDTE1", Type = "string" });
-                            mapa_definicion.Add(new Map { Key = "SDNREG", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "SDFIN", Type = "string" });
-                        break;
+                            break;
                         case 2:
-                            msSQL400 = $"Select CDDLR, CDAB, CDAN, CDAS, CDDLR, CDAB, CDAN, CDAS, CDFIN FROM {main.msLibAS400}.{lsArchivoAS400}";
-                            mapa_definicion.Add(new Map { Key = "CDDLR", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDAB", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDAN", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDAS", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDDLR", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDAB", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDAN", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDAS", Type = "int" });
-                            mapa_definicion.Add(new Map { Key = "CDFIN", Type = "int" });
-                        break;
+                            msSQL400 = $"Select CDDLR, CDAB, CDAN, CDAS, CDBAL, CDDTE, CDREG, CDINT, CDFIN FROM {main.msLibAS400}.{lsArchivoAS400}";
+                            break;
                     }
 
 
                     //Busca los registros por procesar
                     dr = as400.EjecutaSelect(msSQL400);
-                    maps = as400.LLenarMapToQuery(mapa_definicion, dr);
 
-                    if(maps != null)
+                    if (dr.HasRows)
                     {
                         maSaldos = new List<Saldos>();
+                        maVencimientos = new List<Vencim>();
 
-                        if (maps.Count == lnNumRegistros)
+                        while (dr.Read())
                         {
-                            for(int fila = 0; fila < lnNumRegistros; fila++)
+                            switch (TipoInfo)
                             {
-                                switch (TipoInfo)
-                                {
-                                    case 1:
+                                case 1:
 
-                                        Saldos saldo = new Saldos { 
-                                            Agencia = Funcion.Left(maps[fila][0].GetString() + Funcion.Space(4), 4),
-                                            NumCuenta = "",
-                                            SufijoCuenta = "",
-                                            SaldoIniDia = 0,
-                                            InteresDia  = 0,
-                                            SwitchBloqueo = "",
-                                            FechaGenSaldo = "",
-                                            NumRegistros = 0,
-                                            FinRegistro = ""
+                                    Saldos saldo = new Saldos
+                                    {
+                                        Agencia = Funcion.Left(dr.GetString(0) + Funcion.Space(4), 4),
+                                        NumCuenta = Funcion.Left(dr.GetString(1) + Funcion.Space(6), 6),
+                                        SufijoCuenta = Funcion.Left(dr.GetString(2) + Funcion.Space(3), 3),
+                                        SaldoIniDia = dr.GetFloat(3),
+                                        InteresDia = dr.GetInt32(4),
+                                        SwitchBloqueo = dr.GetString(5),
+                                        FechaGenSaldo = DateTime.Parse(dr.GetString(6)),
+                                        NumRegistros = dr.GetInt32(7),
+                                        FinRegistro = dr.GetString(8)
 
-                                        };
-                                         maSaldos.Add(saldo);
+                                    };
 
+                                    lnContador++;
+                                    txtStatusInterfaz.Text = $"Recibiendo Saldos HO. ({lnContador} Registros)";
+                                    ActualizaProgreso(ref pgbrCargaSaldos,10, 40, lnContador, lnNumRegistros);
 
+                                    maSaldos.Add(saldo);
                                     break;
-                                }
+                                
+                                case 2:
+                                    Vencim vencim = new Vencim
+                                    {
+                                        Ticket = dr.GetString(0),
+                                        Agencia = dr.GetString(1),
+                                        NumCuenta = dr.GetString(2),
+                                        SufijoCuenta = dr.GetString(3),
+                                        Saldo = dr.GetFloat(4),
+                                        FechaVen = DateTime.Parse(dr.GetString(5)),
+                                        NumRegistros = dr.GetInt32(6),
+                                        Intereses = dr.GetFloat(7),
+                                        FinRegistro = dr.GetString(8)
+                                    };
+
+                                    lnContador++;
+                                    txtStatusInterfaz.Text = $"Recibiendo Vencimientos HO. ({lnContador} Registros)";
+                                    ActualizaProgreso(ref pgbrCargaVencimientos, 10, 40, lnContador, lnNumRegistros);
+
+                                    maVencimientos.Add(vencim);
+                                    break;
                             }
-                            
+
+                            if(lnContador > 0)
+                            {
+                                //Ajusta el conteo por el ultimo registro
+                                lnContador --;
+                            }
+
+                            gsFechaArchivo = Funcion.InvierteFecha(txtFechaProceso.Text, false);
+
+                            //Se Analiza la estructura
+                            switch (TipoInfo)
+                            {
+                                case 1:
+                                    txtStatusInterfaz.Text = "Verificando integridad de los saldos...";
+                                    if(IntegrityFile(maSaldos, maVencimientos, main.Fecha_Int, TipoInfo, lnContador))
+                                    {
+
+                                    }
+                                    break;
+                                case 2:
+                                    txtStatusInterfaz.Text = "Verificando integridad de los vencimientos...";
+                                    break;
+                            }
+
+
                         }
                     }
-                    
-
-                    
-
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -249,6 +268,45 @@ namespace Interfaz_SaldosDiarios
             }
 
             return ProcesaInfo;
+        }
+
+        private bool IntegrityFile(List<Saldos> laSaldos, List<Vencim> laVencim, string Fecha, int TipoReg, int NumReg)
+        {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            return false;
+        }
+
+        private void ActualizaProgreso(ref ProgressBar progBar, int PorcIniBar, int PorcMaxBar, int NumIteracion, int TotalItercion)
+        {
+            int x, xiter;
+
+            if(TotalItercion > 0 && PorcMaxBar > 0 && NumIteracion > 0)
+            {
+                xiter = ((NumIteracion * 100) / TotalItercion);
+
+                if(xiter > 0)
+                {
+                    if(PorcIniBar < 0)
+                    {
+                        return;
+                    }
+                    x = (PorcMaxBar - PorcIniBar) / (100) * xiter + PorcIniBar;
+
+                    if(x > PorcIniBar && x <= PorcMaxBar && progBar.Value < x)
+                    {
+                        progBar.Value = x;
+                    }
+                }
+            }
+
         }
 
         private bool ActValorTransfer(int status, int tipo_bandera)
