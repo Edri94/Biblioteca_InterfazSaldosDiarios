@@ -272,9 +272,68 @@ namespace Interfaz_SaldosDiarios
 
         private bool IntegrityFile(List<Saldos> laSaldos, List<Vencim> laVencim, string Fecha, int TipoReg, int NumReg)
         {
+            bool IntegrityFile; 
+            int X;
+            int noRegistros;
+            int noRegistrosIni;
+            string deal_reference;
+            string agencia;
+            string cuenta_cliente;
+            string sufijo;
+            string saldo;
+            string interes;
+            string cuenta_bloqueada;
+            string fecha_generacion;
+            string numero_registros;
+            string fin_registro;
+
             try
             {
+                IntegrityFile = false;
+                noRegistros = 0;
+                X = 0;
+                
+                switch (TipoReg)
+                {
+                    case 1:
+                        Message("Revisando Información de saldos");
 
+                        if(!RevisaArchivo(laSaldos, laVencim, 1, NumReg))
+                        {
+                            if(!ActValorTransfer(3, 1))
+                            {
+                                Message("Error al actualizar transfer_saldos_ho = 3");
+                            }
+                            return false;
+                        }
+                        Message("Revisando Integridad de la información de saldos");
+
+                        do
+                        {
+                            //Revisa unicamente la primer linea del archivo para verificar si es DUMMY
+                            if(X == 0)
+                            {
+                                if(ArmaRegistro(laSaldos, laVencim, 1).Trim().ToUpper().Contains("DUMMY"))
+                                {
+                                    Message("Información Vencimientos es DUMMY");
+
+                                    if(!ActValorTransfer(5, 2))
+                                    {
+                                        Message("Error al actualizar trans_venc_ho = 5");
+                                    }
+                                    //GoTo FileDummy
+                                }
+                                X++;
+                            }
+
+                            //Agencia
+                            agencia = laSaldos[noRegistros].Agencia;
+
+
+                        } while (noRegistros <= NumReg);
+
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -282,6 +341,99 @@ namespace Interfaz_SaldosDiarios
                 throw;
             }
             return false;
+        }
+
+        private string ArmaRegistro(List<Saldos> paSaldos, List<Vencim> paVenc, int tipoRegistro)
+        {
+            string ArmaRegistro = "";
+            switch (tipoRegistro)
+            {
+                case 1:
+                    ArmaRegistro += paSaldos[0].Agencia + " " + paSaldos[0].NumCuenta;
+                    ArmaRegistro += " " + paSaldos[0].SufijoCuenta + " " + paSaldos[0].SaldoIniDia;
+                    ArmaRegistro += " " + paSaldos[0].InteresDia + " " + paSaldos[0].SwitchBloqueo;
+                    ArmaRegistro += " " + paSaldos[0].FechaGenSaldo + " " + paSaldos[0].NumRegistros;
+                    ArmaRegistro += " " + paSaldos[0].FinRegistro;
+                break;
+                case 2:
+                    ArmaRegistro = paVenc[0].Ticket + " " + paVenc[0].Agencia;
+                    ArmaRegistro += " " + paVenc[0].Agencia + " " + paVenc[0].NumCuenta;
+                    ArmaRegistro += " " + paVenc[0].SufijoCuenta + " " + paVenc[0].Saldo;
+                    ArmaRegistro += " " + paVenc[0].FechaVen + " " + paVenc[0].NumRegistros;
+                    ArmaRegistro += " " + paVenc[0].Intereses + " " + paVenc[0].FinRegistro;
+                break;
+
+            }
+
+            return ArmaRegistro;
+        }
+
+        private bool RevisaArchivo(List<Saldos> revisaSaldo, List<Vencim> revisaVenc, int tipo, int RegExist)
+        {
+            int indice = 0;
+            do
+            {
+                if(tipo == 2)
+                {
+                    if(!FiltraCadena(revisaVenc[indice].Ticket) || 
+                        !FiltraCadena(revisaVenc[indice].Agencia) ||
+                        !FiltraCadena(revisaVenc[indice].NumCuenta) || 
+                        !FiltraCadena(revisaVenc[indice].SufijoCuenta) || 
+                        !FiltraCadena(revisaVenc[indice].FechaVen.ToString()) || 
+                        !FiltraCadena(revisaVenc[indice].FinRegistro))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!FiltraCadena(revisaSaldo[indice].Agencia) ||
+                       !FiltraCadena(revisaSaldo[indice].NumCuenta) ||
+                       !FiltraCadena(revisaSaldo[indice].SufijoCuenta) ||
+                       !FiltraCadena(revisaSaldo[indice].SwitchBloqueo) ||
+                       !FiltraCadena(revisaSaldo[indice].FechaGenSaldo.ToString()))
+                    {
+                        return false;
+                    }
+                }
+
+                indice++;
+
+            } while (indice <= RegExist);
+
+            return true;
+
+        }
+
+        private bool FiltraCadena(string cadena)
+        {
+            bool FiltraCadena = false; 
+
+            string lsNueva;
+            string lsvalidos;
+            int lnCaracter;
+            try
+            {
+                if(cadena.Trim() == "")
+                {
+                    FiltraCadena = false;
+                    return FiltraCadena;
+                }
+
+                FiltraCadena = new Regex(@"^[a-zA-Z0-9.,-/()]+$").Match(cadena).Success;
+                
+                if(!FiltraCadena)
+                {
+                    Message("El archivo contiene caracteres Inválidos");
+                }
+
+                return FiltraCadena;
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+                return FiltraCadena;
+            }
         }
 
         private void ActualizaProgreso(ref ProgressBar progBar, int PorcIniBar, int PorcMaxBar, int NumIteracion, int TotalItercion)
