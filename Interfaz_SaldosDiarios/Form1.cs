@@ -311,13 +311,13 @@ namespace Interfaz_SaldosDiarios
                         do
                         {
                             //Revisa unicamente la primer linea del archivo para verificar si es DUMMY
-                            if(X == 0)
+                            if (X == 0)
                             {
-                                if(ArmaRegistro(laSaldos, laVencim, 1).Trim().ToUpper().Contains("DUMMY"))
+                                if (ArmaRegistro(laSaldos, laVencim, 1).Trim().ToUpper().Contains("DUMMY"))
                                 {
                                     Message("Información Vencimientos es DUMMY");
 
-                                    if(!ActValorTransfer(5, 2))
+                                    if (!ActValorTransfer(5, 2))
                                     {
                                         Message("Error al actualizar trans_venc_ho = 5");
                                     }
@@ -328,7 +328,78 @@ namespace Interfaz_SaldosDiarios
 
                             //Agencia
                             agencia = laSaldos[noRegistros].Agencia;
+                            if (agencia.Trim() == "" || !IsNumeric(agencia))
+                            {
+                                return false;
+                            }
+                            //Cuenta Cliente
+                            cuenta_cliente = laSaldos[noRegistros].Agencia.Trim();
 
+                            if (cuenta_cliente == "" || !IsNumeric(cuenta_cliente))
+                            {
+                                return false;
+                            }
+                            //Sufijo Cuenta
+                            sufijo = laSaldos[noRegistros].SufijoCuenta.Trim();
+                            if (sufijo == "" || !IsNumeric(sufijo))
+                            {
+                                return false;
+                            }
+                            //Saldo
+                            saldo = laSaldos[noRegistros].SaldoIniDia.ToString();
+                            saldo = saldo.Replace(" -.", "-0."); // Línea que corrige el problema de los números negativos
+                            if (saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14))) && Funcion.Mid(saldo, 1, 14).Trim() != "" || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
+                            {
+                                return false;
+                            }
+                            //Interes
+                            interes = laSaldos[noRegistros].InteresDia.ToString();
+                            interes = interes.Replace(" -.", "-0.");
+                            if (interes.Trim() == "" || !IsNumeric(Funcion.Mid(interes, 1, 14)) && Funcion.Mid(interes, 1, 14) != "" || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
+                            {
+                                return false;
+                            }
+                            //Cuenta bloqueada
+                            cuenta_bloqueada = laSaldos[noRegistros].SwitchBloqueo.Trim();
+                            if (cuenta_bloqueada == "" || cuenta_bloqueada != "Y" && cuenta_bloqueada != "N")
+                            {
+                                return false;
+                            }
+                            //Fecha Agencia
+                            fecha_generacion = laSaldos[noRegistros].FechaGenSaldo.ToString().Trim();
+                            if (fecha_generacion == "")
+                            {
+                                return false;
+                            }
+                            double diferencia_fechas = (DateTime.Parse(Fecha) - DateTime.Parse(fecha_generacion)).TotalDays;
+                            if (diferencia_fechas != 0)
+                            {
+                                Message("La información de saldos contiene Diferencias en Fechas");
+                                if(!ActValorTransfer(2,1))
+                                {
+                                    Message("Error al actualizar el valor de trasfer_saldos_ho = 2");
+                                }
+                                return false;
+                            }
+
+                            //Numero de registros
+                            numero_registros = laSaldos[noRegistros].NumRegistros.ToString();
+                            if(numero_registros == "" || !IsNumeric(numero_registros))
+                            {
+                                return false;
+                            }
+                            if(noRegistros == 0)
+                            {
+                                noRegistros = laSaldos[noRegistros].NumRegistros;
+                            }
+                            //Fin de registros
+                            fin_registro = Funcion.Right(laSaldos[noRegistros].FinRegistro, 1);
+                            if(fin_registro.Trim() != "*")
+                            {
+                                return false;
+                            }
+                            ActualizaProgreso(ref pgbrCargaSaldos, 50, 70, noRegistros, NumReg);
+                            noRegistros++;
 
                         } while (noRegistros <= NumReg);
 
@@ -694,6 +765,11 @@ namespace Interfaz_SaldosDiarios
             }
 
             return EstableceConexion;
+        }
+
+        public static bool IsNumeric(string value)
+        {
+            return value.All(char.IsNumber);
         }
     }
 }
