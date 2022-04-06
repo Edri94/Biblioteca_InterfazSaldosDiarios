@@ -272,10 +272,10 @@ namespace Interfaz_SaldosDiarios
 
         private bool IntegrityFile(List<Saldos> laSaldos, List<Vencim> laVencim, string Fecha, int TipoReg, int NumReg)
         {
-            bool IntegrityFile; 
+            bool IntegrityFile;
             int X;
             int noRegistros;
-            int noRegistrosIni;
+            int noRegistrosIni = 0;
             string deal_reference;
             string agencia;
             string cuenta_cliente;
@@ -390,7 +390,7 @@ namespace Interfaz_SaldosDiarios
                             }
                             if(noRegistros == 0)
                             {
-                                noRegistros = laSaldos[noRegistros].NumRegistros;
+                                noRegistrosIni = laSaldos[noRegistros].NumRegistros;
                             }
                             //Fin de registros
                             fin_registro = Funcion.Right(laSaldos[noRegistros].FinRegistro, 1);
@@ -403,7 +403,94 @@ namespace Interfaz_SaldosDiarios
 
                         } while (noRegistros <= NumReg);
 
-                        break;
+                        if(noRegistros != noRegistrosIni)
+                        {
+                            Message("Numero de registros incorrecto...");
+                            if(!ActValorTransfer(4,1))
+                            {
+                                Message("Error al actualizar del parametro trans_saldos_ho = 4");
+                            }
+                            return false;
+                        }
+                    break;
+                    case 2:
+                        Message("Revisando Información de vencimientos");
+                        if(!RevisaArchivo(laSaldos, laVencim, 2, NumReg))
+                        {
+                            if(!ActValorTransfer(3,2))
+                            {
+                                Message("Error al actualizar transfer_venc_ho = 3");
+                            }
+                        }
+                        Message("Revisando Integridad de la información de vencimientos");
+
+                        do
+                        {
+                            //Revisa unicamente la primer linea del archivo para verificar si es DUMMY
+                            if (X == 0)
+                            {
+                                if (ArmaRegistro(laSaldos, laVencim, 2).Trim().ToUpper().Contains("DUMMY"))
+                                {
+                                    Message("Información Vencimientos es DUMMY");
+                                    if (!ActValorTransfer(5, 2))
+                                    {
+                                        Message("Error al actualizar trans_venc_ho = 5");
+                                    }
+                                    //GoTo FileDummy
+                                }
+                                X++;
+                            }
+
+                            //Ticket
+                            deal_reference = laVencim[noRegistros].Ticket.Trim();
+                            if (deal_reference == "")
+                            {
+                                return false;
+                            }
+                            //Agencia
+                            agencia = laVencim[noRegistros].Agencia.Trim();
+                            if (agencia == "" || !IsNumeric(agencia))
+                            {
+                                return false;
+                            }
+
+                            //Cuenta cliente
+                            cuenta_cliente = laVencim[noRegistros].NumCuenta.Trim();
+                            if (cuenta_cliente == "" || !IsNumeric(cuenta_cliente))
+                            {
+                                return false;
+                            }
+
+                            //Sufijo Cuenta
+                            sufijo = laVencim[noRegistros].SufijoCuenta.Trim();
+                            if (sufijo == "" || !IsNumeric(sufijo))
+                            {
+                                return false;
+                            }
+
+                            //Saldo
+                            saldo = laVencim[noRegistros].Saldo.ToString();
+                            saldo = saldo.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
+
+                            if(saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14) != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
+                            {
+                                return false;
+                            }
+
+                            
+
+
+
+
+
+
+                        } while (noRegistros <= NumReg);
+
+
+
+
+
+                    break;
                 }
             }
             catch (Exception ex)
