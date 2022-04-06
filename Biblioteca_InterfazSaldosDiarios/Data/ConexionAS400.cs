@@ -143,5 +143,42 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
                 return null;
             }        
         }
+
+        public int EjecutaActualizacion(string query)
+        {
+            try
+            {
+                OdbcCommand DbCommand = DbConnection.CreateCommand();
+                DbCommand.CommandText = query;
+                int afectados = DbCommand.ExecuteNonQuery();
+
+                return afectados;
+            }
+            catch (OdbcException ex)
+            {
+                Log.Escribe($"Fallo actualizacion a {this.dsn}", "Error");
+                Log.Escribe(ex);
+                return -1;
+            }
+        }
+
+        public int EjecutaActualizacion(string query, OdbcParameter[] parametros)
+        {
+            try
+            {
+                OdbcCommand DbCommand = DbConnection.CreateCommand();
+                DbCommand.CommandText = query;
+                DbCommand.Parameters.Add(parametros);
+                int afectados = DbCommand.ExecuteNonQuery();
+
+                return afectados;
+            }
+            catch (OdbcException ex)
+            {
+                Log.Escribe($"Fallo actualizacion a {this.dsn}", "Error");
+                Log.Escribe(ex);
+                return -1;
+            }
+        }
     }
 }

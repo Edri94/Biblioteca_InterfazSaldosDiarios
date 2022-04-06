@@ -249,7 +249,14 @@ namespace Interfaz_SaldosDiarios
                                     txtStatusInterfaz.Text = "Verificando integridad de los saldos...";
                                     if(IntegrityFile(maSaldos, maVencimientos, main.Fecha_Int, TipoInfo, lnContador))
                                     {
-
+                                        if (!LimpiaTablasSV(TipoInfo))
+                                        {
+                                            pgbrCargaSaldos.Value = 70;
+                                            if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
+                                            {
+                                                ErrorRecepcion();
+                                            }
+                                        }
                                     }
                                     break;
                                 case 2:
@@ -268,6 +275,145 @@ namespace Interfaz_SaldosDiarios
             }
 
             return ProcesaInfo;
+        }
+
+        private bool CargaArchivosHO(List<Saldos> cargaSaldo, List<Vencim> cargaVenc, int tipo, int NumRegistros)
+        {
+            int lnIndice;
+            string lsQuery;
+            bool CargaArchivosHO = false;
+            try
+            {
+                if(tipo == 1)
+                {
+                    if(ArchivoDummy(cargaSaldo, cargaVenc, "FINTLA20", 1, "8000"))
+                    { 
+
+                    }
+                }
+
+                return CargaArchivosHO;
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+                return CargaArchivosHO;
+            }
+        }
+
+        private bool ArchivoDummy(List<Saldos> FileSaldo, List<Vencim> FileVenc, string Titulo, int tipo, string agencia)
+        {
+            bool lbDummy = false;
+            string Ls_Query;
+
+            try
+            {
+                switch (tipo)
+                {
+                    case 1:
+                        if(ArmaRegistro(FileSaldo, FileVenc, 1).Trim().ToUpper().Trim().IndexOf("DUMMY") > 0)
+                        {
+                            lbDummy = true;
+                        }
+                    break;
+                    case 2:
+                        if (ArmaRegistro(FileSaldo, FileVenc, 2).Trim().ToUpper().Trim().IndexOf("DUMMY") > 0)
+                        {
+                            lbDummy = true;
+                        }
+                    break;
+                }
+
+                if (lbDummy)
+                {
+                   
+                    if(tipo == 1)  //Es archivo de Saldos
+                    {
+                        Ls_Query = "Insert into SALDOS_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) values (@agencia, @cuenta_cliente, @sufijo, @saldo, @interes, @cuenta_bloqueada, @fecha_generacion, @numero_registros, @fin_registro);";
+                        
+                        OdbcParameter[] parameters = new OdbcParameter[] { 
+                            new OdbcParameter("@agencia", agencia), 
+                            new OdbcParameter("@cuenta_cliente", "DUMMY"), 
+                            new OdbcParameter("@sufijo", "0"), 
+                            new OdbcParameter("@saldo", "0"), 
+                            new OdbcParameter("@interes","0"), 
+                            new OdbcParameter("@cuenta_bloqueada", "0"), 
+                            new OdbcParameter("@fecha_generacion", Funcion.InvierteFecha(gsFechaArchivo, false)), 
+                            new OdbcParameter("@numero_registros", "0"), 
+                            new OdbcParameter("@fin_registro", "*"), 
+                        };
+
+                        as400.EjecutaActualizacion(Ls_Query, parameters);
+                    }
+                    else //Es archivo de Vencimientos
+                    {
+                        Ls_Query = "Insert into SALDOS_CD_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) values (@agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
+                        
+                        OdbcParameter[] parameters = new OdbcParameter[] {
+                            new OdbcParameter("@agencia", agencia),
+                            new OdbcParameter("@cuenta_cliente", "DUMMY"),
+                            new OdbcParameter("@sufijo", "0"),
+                            new OdbcParameter("@saldo", "0"),
+                            new OdbcParameter("@fecha_generacion",Funcion.InvierteFecha(gsFechaArchivo, false)),
+                            new OdbcParameter("@numero_registros", "0"),
+                            new OdbcParameter("@intereses","0"),
+                            new OdbcParameter("@fin_registro", "*"),
+                        };
+
+                        as400.EjecutaActualizacion(Ls_Query, parameters);
+                    }
+
+                   
+                }
+                return lbDummy;
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+                return lbDummy;
+            }
+        }
+
+        private bool LimpiaTablasSV(int tipo)
+        {
+            bool LimpiaTablasSV = false;
+            string lsQuery = "";
+            int afectados = 0;
+            try
+            {
+                switch (tipo)
+                {
+                    case 1:
+                        Message("Limpiando Tabla de Saldos...");
+                        lsQuery = "TRUNCATE TABLE SALDOS_KAPITI";
+                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        Message("SALDOS_KAPITI Limpia.");
+                        lsQuery = "TRUNCATE TABLE SALDOS_KAPITI_1";
+                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        Message("SALDOS_KAPITI_1 Limpia.");
+                        LimpiaTablasSV = true;
+                    break;
+
+                    case 2:
+                        Message("Limpiando Tabla de Vencimientos...");
+                        lsQuery = "TRUNCATE TABLE SALDOS_CD_KAPITI";
+                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        Message("SALDOS_CD_KAPITI Limpia.");
+                        lsQuery = "TRUNCATE TABLE SALDOS_CD_KAPITI_1";
+                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        Message("SALDOS_CD_KAPITI_1 Limpia.");
+                        LimpiaTablasSV = true;
+                    break;
+
+                }
+
+                return LimpiaTablasSV;
+            }
+            catch (Exception ex)
+            {
+                Log.Escribe(ex);
+                return LimpiaTablasSV;
+            }
         }
 
         private bool IntegrityFile(List<Saldos> laSaldos, List<Vencim> laVencim, string Fecha, int TipoReg, int NumReg)
@@ -304,7 +450,7 @@ namespace Interfaz_SaldosDiarios
                             {
                                 Message("Error al actualizar transfer_saldos_ho = 3");
                             }
-                            return false;
+                            return IntegrityFile;
                         }
                         Message("Revisando Integridad de la información de saldos");
 
@@ -321,7 +467,7 @@ namespace Interfaz_SaldosDiarios
                                     {
                                         Message("Error al actualizar trans_venc_ho = 5");
                                     }
-                                    //GoTo FileDummy
+                                    return InfoDummy();
                                 }
                                 X++;
                             }
@@ -330,46 +476,46 @@ namespace Interfaz_SaldosDiarios
                             agencia = laSaldos[noRegistros].Agencia;
                             if (agencia.Trim() == "" || !IsNumeric(agencia))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             //Cuenta Cliente
                             cuenta_cliente = laSaldos[noRegistros].Agencia.Trim();
 
                             if (cuenta_cliente == "" || !IsNumeric(cuenta_cliente))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             //Sufijo Cuenta
                             sufijo = laSaldos[noRegistros].SufijoCuenta.Trim();
                             if (sufijo == "" || !IsNumeric(sufijo))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             //Saldo
                             saldo = laSaldos[noRegistros].SaldoIniDia.ToString();
                             saldo = saldo.Replace(" -.", "-0."); // Línea que corrige el problema de los números negativos
-                            if (saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14))) && Funcion.Mid(saldo, 1, 14).Trim() != "" || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
+                            if (saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14).Trim() != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             //Interes
                             interes = laSaldos[noRegistros].InteresDia.ToString();
                             interes = interes.Replace(" -.", "-0.");
-                            if (interes.Trim() == "" || !IsNumeric(Funcion.Mid(interes, 1, 14)) && Funcion.Mid(interes, 1, 14) != "" || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
+                            if (interes.Trim() == "" || (!IsNumeric(Funcion.Mid(interes, 1, 14)) && Funcion.Mid(interes, 1, 14) != "") || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             //Cuenta bloqueada
                             cuenta_bloqueada = laSaldos[noRegistros].SwitchBloqueo.Trim();
-                            if (cuenta_bloqueada == "" || cuenta_bloqueada != "Y" && cuenta_bloqueada != "N")
+                            if (cuenta_bloqueada == "" || (cuenta_bloqueada != "Y" && cuenta_bloqueada != "N"))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             //Fecha Agencia
                             fecha_generacion = laSaldos[noRegistros].FechaGenSaldo.ToString().Trim();
                             if (fecha_generacion == "")
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             double diferencia_fechas = (DateTime.Parse(Fecha) - DateTime.Parse(fecha_generacion)).TotalDays;
                             if (diferencia_fechas != 0)
@@ -379,14 +525,14 @@ namespace Interfaz_SaldosDiarios
                                 {
                                     Message("Error al actualizar el valor de trasfer_saldos_ho = 2");
                                 }
-                                return false;
+                                return IntegrityFile;
                             }
 
                             //Numero de registros
                             numero_registros = laSaldos[noRegistros].NumRegistros.ToString();
                             if(numero_registros == "" || !IsNumeric(numero_registros))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             if(noRegistros == 0)
                             {
@@ -396,7 +542,7 @@ namespace Interfaz_SaldosDiarios
                             fin_registro = Funcion.Right(laSaldos[noRegistros].FinRegistro, 1);
                             if(fin_registro.Trim() != "*")
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             ActualizaProgreso(ref pgbrCargaSaldos, 50, 70, noRegistros, NumReg);
                             noRegistros++;
@@ -410,7 +556,7 @@ namespace Interfaz_SaldosDiarios
                             {
                                 Message("Error al actualizar del parametro trans_saldos_ho = 4");
                             }
-                            return false;
+                            return IntegrityFile;
                         }
                     break;
                     case 2:
@@ -436,7 +582,7 @@ namespace Interfaz_SaldosDiarios
                                     {
                                         Message("Error al actualizar trans_venc_ho = 5");
                                     }
-                                    //GoTo FileDummy
+                                    return InfoDummy();
                                 }
                                 X++;
                             }
@@ -445,27 +591,27 @@ namespace Interfaz_SaldosDiarios
                             deal_reference = laVencim[noRegistros].Ticket.Trim();
                             if (deal_reference == "")
                             {
-                                return false;
+                                return IntegrityFile;
                             }
                             //Agencia
                             agencia = laVencim[noRegistros].Agencia.Trim();
                             if (agencia == "" || !IsNumeric(agencia))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
 
                             //Cuenta cliente
                             cuenta_cliente = laVencim[noRegistros].NumCuenta.Trim();
                             if (cuenta_cliente == "" || !IsNumeric(cuenta_cliente))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
 
                             //Sufijo Cuenta
                             sufijo = laVencim[noRegistros].SufijoCuenta.Trim();
                             if (sufijo == "" || !IsNumeric(sufijo))
                             {
-                                return false;
+                                return IntegrityFile;
                             }
 
                             //Saldo
@@ -474,31 +620,84 @@ namespace Interfaz_SaldosDiarios
 
                             if(saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14) != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
                             {
-                                return false;
+                                return IntegrityFile;
                             }
 
-                            
+                            // Fecha Generacion
+                            fecha_generacion = laVencim[noRegistros].FechaVen.ToString();
+                            if(fecha_generacion == "")
+                            {
+                                return IntegrityFile;
+                            }
+                            double diferencia_fechas = (DateTime.Parse(Fecha) - DateTime.Parse(fecha_generacion)).TotalDays;
+                            if(diferencia_fechas != 0)
+                            {
+                                Message("La información de vencimientos contiene Diferencias en Fechas");
+                                if(!ActValorTransfer(2,2))
+                                {
+                                    Message("Error al actualizar el valor de trasfer_venc_ho = 2");
+                                }
+                                return IntegrityFile;
+                            }
 
+                            //Numero de Registros
+                            numero_registros = laVencim[noRegistros].NumRegistros.ToString();
+                            if(numero_registros == ""  || !IsNumeric(numero_registros))
+                            {
+                                return IntegrityFile;
+                            }
 
+                            if(noRegistros == 0)
+                            {
+                                noRegistrosIni = laVencim[noRegistros].NumRegistros;
+                            }
 
+                            //Intereses
+                            interes = laVencim[noRegistros].Intereses.ToString();
+                            interes = interes.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
+                            if(interes == "" || (!IsNumeric(Funcion.Mid(interes,1,14)) && Funcion.Mid(interes, 1, 14) != "") || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
+                            {
+                                return IntegrityFile;
+                            }
+                            // Fin de registros
+                            fin_registro = laVencim[noRegistros].FinRegistro.Trim();
+                            if(fin_registro != "*")
+                            {
+                                return IntegrityFile;
+                            }
 
-
+                            ActualizaProgreso(ref pgbrCargaVencimientos, 50, 70, noRegistros, NumReg);
+                            noRegistros++;
 
                         } while (noRegistros <= NumReg);
 
-
-
-
+                        if(noRegistros != noRegistrosIni)
+                        {
+                            Message("Numero de registros incorrecto...");
+                            if(!ActValorTransfer(4,2))
+                            {
+                                Message("Error al actualizar del parametro trans_venc_ho = 4");
+                            }
+                            return IntegrityFile;
+                        }
 
                     break;
                 }
+                IntegrityFile = true;
+                return IntegrityFile;
             }
             catch (Exception ex)
             {
-
-                throw;
+                Log.Escribe(ex);
+                Message("Error al verificar el integridad del archivo ");
+                return false;
             }
-            return false;
+        }
+
+        private bool InfoDummy()
+        {
+            Message("La información es Dummy...");
+            return true;
         }
 
         private string ArmaRegistro(List<Saldos> paSaldos, List<Vencim> paVenc, int tipoRegistro)
