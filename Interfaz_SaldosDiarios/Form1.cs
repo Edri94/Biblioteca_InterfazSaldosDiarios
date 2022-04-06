@@ -207,11 +207,11 @@ namespace Interfaz_SaldosDiarios
 
                                     lnContador++;
                                     txtStatusInterfaz.Text = $"Recibiendo Saldos HO. ({lnContador} Registros)";
-                                    ActualizaProgreso(ref pgbrCargaSaldos,10, 40, lnContador, lnNumRegistros);
+                                    ActualizaProgreso(ref pgbrCargaSaldos, 10, 40, lnContador, lnNumRegistros);
 
                                     maSaldos.Add(saldo);
                                     break;
-                                
+
                                 case 2:
                                     Vencim vencim = new Vencim
                                     {
@@ -234,10 +234,10 @@ namespace Interfaz_SaldosDiarios
                                     break;
                             }
 
-                            if(lnContador > 0)
+                            if (lnContador > 0)
                             {
                                 //Ajusta el conteo por el ultimo registro
-                                lnContador --;
+                                lnContador--;
                             }
 
                             gsFechaArchivo = Funcion.InvierteFecha(txtFechaProceso.Text, false);
@@ -247,25 +247,54 @@ namespace Interfaz_SaldosDiarios
                             {
                                 case 1:
                                     txtStatusInterfaz.Text = "Verificando integridad de los saldos...";
-                                    if(IntegrityFile(maSaldos, maVencimientos, main.Fecha_Int, TipoInfo, lnContador))
+                                    if (IntegrityFile(maSaldos, maVencimientos, main.Fecha_Int, TipoInfo, lnContador))
                                     {
                                         if (!LimpiaTablasSV(TipoInfo))
                                         {
-                                            pgbrCargaSaldos.Value = 70;
-                                            if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
-                                            {
-                                                ErrorRecepcion();
-                                            }
+                                            ErrorRecepcion();
                                         }
+                                        pgbrCargaSaldos.Value = 70;
+                                        if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
+                                        {
+                                            ErrorRecepcion();
+                                        }
+                                        else
+                                        {
+                                            lblNumSaldosHO.Text = ("Registros procesados : 0");
+                                            Message("Error en la integridad de los saldos");
+                                            return ErrorProceso();
+                                        }
+
                                     }
                                     break;
                                 case 2:
                                     txtStatusInterfaz.Text = "Verificando integridad de los vencimientos...";
+
+                                    if (IntegrityFile(maSaldos, maVencimientos, gsFechaArchivo, TipoInfo, lnContador))
+                                    {
+                                        if (!LimpiaTablasSV(TipoInfo))
+                                        {
+                                            ErrorRecepcion();
+                                        }
+                                        pgbrCargaVencimientos.Value = 70;
+                                        if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
+                                        {
+                                            ErrorRecepcion();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        lblNumVencimHO.Text = "Registros procesados : 0";
+                                        Message("Error en la integridad de los vencimientos");
+                                        return ErrorProceso();
+                                    }
                                     break;
                             }
-
-
                         }
+                    }
+                    else
+                    {
+                        ErrorProceso();
                     }
                 }
             }
@@ -277,9 +306,20 @@ namespace Interfaz_SaldosDiarios
             return ProcesaInfo;
         }
 
+        private bool ErrorProceso()
+        {
+            return false;
+        }
+
+        private void ErrorRecepcion()
+        {
+            Message("Interfaz de Movimientos de las Agencias");
+            Message("Error Inesperado de Operación. Transferencia Terminada.");
+        }
+
         private bool CargaArchivosHO(List<Saldos> cargaSaldo, List<Vencim> cargaVenc, int tipo, int NumRegistros)
         {
-            int lnIndice;
+            int lnIndice = 0;
             string lsQuery;
             bool CargaArchivosHO = false;
             try
@@ -287,11 +327,77 @@ namespace Interfaz_SaldosDiarios
                 if(tipo == 1)
                 {
                     if(ArchivoDummy(cargaSaldo, cargaVenc, "FINTLA20", 1, "8000"))
-                    { 
-
+                    {
+                        return FileDummy();
                     }
-                }
+                    lnIndice = 0;
+                    Message("Cargando Archivo de Saldos de Houston...");
 
+                    do
+                    {
+                        lsQuery = "INSERT INTO SALDOS_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) VALUES (@agencia, @cuenta_cliente, @sufijo, @saldo, @interes, @cuenta_bloqueada, @fecha_generacion, @numero_registros, @fin_registro);";
+                        
+                        OdbcParameter[] parameters = new OdbcParameter[] {
+                            new OdbcParameter("@agencia", cargaSaldo[lnIndice].Agencia.ToString()),
+                            new OdbcParameter("@cuenta_cliente", cargaSaldo[lnIndice].NumCuenta.ToString()),
+                            new OdbcParameter("@sufijo", cargaSaldo[lnIndice].SufijoCuenta.ToString()),
+                            new OdbcParameter("@saldo", cargaSaldo[lnIndice].SaldoIniDia.ToString()),
+                            new OdbcParameter("@interes", cargaSaldo[lnIndice].InteresDia.ToString()),
+                            new OdbcParameter("@cuenta_bloqueada", cargaSaldo[lnIndice].SwitchBloqueo.ToString()),
+                            new OdbcParameter("@fecha_generacion",cargaSaldo[lnIndice].FechaGenSaldo.ToString()),
+                            new OdbcParameter("@numero_registros", cargaSaldo[lnIndice].NumRegistros.ToString()),
+                            new OdbcParameter("@fin_registro",cargaSaldo[lnIndice].FinRegistro.ToString()),
+                        };
+
+                        as400.EjecutaActualizacion(lsQuery, parameters);
+
+                        Message($"Cargando saldo :{lnIndice}, en la base de datos");
+                        ActualizaProgreso(ref pgbrCargaSaldos, 70, 95, lnIndice, NumRegistros);
+                        lnIndice++;
+
+                    } while (lnIndice <= NumRegistros);
+
+                    lblNumSaldosHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
+                    Message("Carga de Saldos de Houston Terminada...");
+                }
+                else if (tipo == 2)
+                {
+                    if (ArchivoDummy(cargaSaldo, cargaVenc, "FINTLA21", 2, "8000"))
+                    {
+                        return FileDummy();
+                    }
+                        lnIndice = 0;
+                        Message("Cargando Archivo de Vencimientos de Houston...");
+
+
+                        do
+                        {
+                            lsQuery = "INSERT INTO SALDOS_CD_KAPITI_1 (deal_reference, agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) VALUES (@deal_reference, @agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
+
+                            OdbcParameter[] parameters = new OdbcParameter[] {
+                                new OdbcParameter("@deal_reference", cargaVenc[lnIndice].Ticket.ToString()),
+                                new OdbcParameter("@agencia", cargaVenc[lnIndice].Agencia.ToString()),
+                                new OdbcParameter("@cuenta_cliente", cargaVenc[lnIndice].NumCuenta.ToString()),
+                                new OdbcParameter("@sufijo", cargaVenc[lnIndice].SufijoCuenta.ToString()),
+                                new OdbcParameter("@saldo", cargaVenc[lnIndice].Saldo.ToString()),
+                                new OdbcParameter("@fecha_generacion", cargaVenc[lnIndice].FechaVen.ToString()),
+                                new OdbcParameter("@numero_registros",cargaVenc[lnIndice].NumRegistros.ToString()),
+                                new OdbcParameter("@intereses", cargaVenc[lnIndice].Intereses.ToString()),
+                                new OdbcParameter("@fin_registro",cargaVenc[lnIndice].FinRegistro.ToString()),
+                            };
+
+                            as400.EjecutaActualizacion(lsQuery, parameters);
+
+                            Message($"Cargando vencimiento :{lnIndice}, en la base de datos");
+                            ActualizaProgreso(ref pgbrCargaVencimientos, 70, 95, lnIndice, NumRegistros);
+                            lnIndice++;
+
+                        } while (lnIndice <= NumRegistros);
+
+                        lblNumVencimHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
+                        Message("Carga de Vencimientos de Houston Terminada...");                   
+                }
+                CargaArchivosHO = true;
                 return CargaArchivosHO;
             }
             catch (Exception ex)
@@ -299,6 +405,12 @@ namespace Interfaz_SaldosDiarios
                 Log.Escribe(ex);
                 return CargaArchivosHO;
             }
+        }
+
+        private bool FileDummy()
+        {
+            Message("Carga de archivo Dummy");
+            return true;
         }
 
         private bool ArchivoDummy(List<Saldos> FileSaldo, List<Vencim> FileVenc, string Titulo, int tipo, string agencia)
