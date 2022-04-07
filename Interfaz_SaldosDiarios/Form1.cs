@@ -107,10 +107,36 @@ namespace Interfaz_SaldosDiarios
 
                     if (!ActValorTransfer(1, 1))
                     {
-
+                        Message("Error al actualizar la bandera transfer_saldos_ho = 1");
                     }
                 }
             }
+            else
+            {
+                Message("Carga de saldos relizada previamente...");
+            }
+
+            pgbrCargaSaldos.Value = 100;
+
+            pgbrCargaVencimientos.Value = 5;
+            if(mnBanderaVHO == 0)
+            {
+                if(ProcesaInfo(2))
+                {
+                    Message("Carga de vencimientos completa...");
+                    if(!ActValorTransfer(1,2))
+                    {
+                        Message("Error al actualizar la bandera transfer_venc_ho = 1");
+                    }
+                }
+            }
+            else
+            {
+                Message("Error al actualizar la bandera transfer_venc_ho = 1");
+            }
+            pgbrCargaVencimientos.Value = 100;
+
+            Message("DECONECTADO");
         }
 
         private bool ProcesaInfo(int TipoInfo)
@@ -1140,8 +1166,6 @@ namespace Interfaz_SaldosDiarios
         {
             int lnIntento = 1;
             bool EstableceConexion = false;
-
-            Message("Estableciendo conexion con AS400...");
 
 
             try
