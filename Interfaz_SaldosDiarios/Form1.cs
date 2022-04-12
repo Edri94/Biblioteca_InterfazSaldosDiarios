@@ -87,7 +87,7 @@ namespace Interfaz_SaldosDiarios
                 Message("Calculando fecha de los archivos a recuperar...");
 
                 if (CalculaFechaArchivos())
-                {
+                {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                     txtFechaArchivos.Text = ls_fechaoperacion;
                     mnBanderaSHO = 0;
                     mnBanderaVHO = 0;
@@ -206,6 +206,8 @@ namespace Interfaz_SaldosDiarios
                     //Busca los registros por procesar
                     dr = as400.EjecutaSelect(msSQL400);
 
+
+                    //si hay registros de la consulta...
                     if (dr.HasRows)
                     {
                         maSaldos = new List<Saldos>();
@@ -259,64 +261,66 @@ namespace Interfaz_SaldosDiarios
                                     maVencimientos.Add(vencim);
                                     break;
                             }
+                        }
 
-                            if (lnContador > 0)
-                            {
-                                //Ajusta el conteo por el ultimo registro
-                                lnContador--;
-                            }
+                        if (lnContador > 0)
+                        {
+                            //Ajusta el conteo por el ultimo registro
+                            lnContador--;
+                        }
 
-                            gsFechaArchivo = Funcion.InvierteFecha(txtFechaProceso.Text, false);
+                        gsFechaArchivo = Funcion.InvierteFecha(txtFechaProceso.Text, false);
 
-                            //Se Analiza la estructura
-                            switch (TipoInfo)
-                            {
-                                case 1:
-                                    txtStatusInterfaz.Text = "Verificando integridad de los saldos...";
-                                    if (IntegrityFile(maSaldos, maVencimientos, main.Fecha_Int, TipoInfo, lnContador))
+                        //Se Analiza la estructura
+                        switch (TipoInfo)
+                        {
+                                
+                            case 1:          
+                                txtStatusInterfaz.Text = "Verificando integridad de los saldos...";
+                                if (IntegrityFile(maSaldos, maVencimientos, Funcion.InvierteFecha(main.Fecha_Int, false), TipoInfo, lnContador))
+                                {
+                                    if (!LimpiaTablasSV(TipoInfo))
                                     {
-                                        if (!LimpiaTablasSV(TipoInfo))
-                                        {
-                                            ErrorRecepcion();
-                                        }
-                                        pgbrCargaSaldos.Value = 70;
-                                        if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
-                                        {
-                                            ErrorRecepcion();
-                                        }
-                                        else
-                                        {
-                                            lblNumSaldosHO.Text = ("Registros procesados : 0");
-                                            Message("Error en la integridad de los saldos");
-                                            return ErrorProceso();
-                                        }
-
+                                        ErrorRecepcion();
                                     }
-                                    break;
-                                case 2:
-                                    txtStatusInterfaz.Text = "Verificando integridad de los vencimientos...";
-
-                                    if (IntegrityFile(maSaldos, maVencimientos, gsFechaArchivo, TipoInfo, lnContador))
+                                    pgbrCargaSaldos.Value = 70;
+                                    if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
                                     {
-                                        if (!LimpiaTablasSV(TipoInfo))
-                                        {
-                                            ErrorRecepcion();
-                                        }
-                                        pgbrCargaVencimientos.Value = 70;
-                                        if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
-                                        {
-                                            ErrorRecepcion();
-                                        }
+                                        ErrorRecepcion();
                                     }
                                     else
                                     {
-                                        lblNumVencimHO.Text = "Registros procesados : 0";
-                                        Message("Error en la integridad de los vencimientos");
+                                        lblNumSaldosHO.Text = ("Registros procesados : 0");
+                                        Message("Error en la integridad de los saldos");
                                         return ErrorProceso();
                                     }
-                                    break;
-                            }
+
+                                }
+                                break;
+                            case 2:
+                                txtStatusInterfaz.Text = "Verificando integridad de los vencimientos...";
+
+                                if (IntegrityFile(maSaldos, maVencimientos, gsFechaArchivo, TipoInfo, lnContador))
+                                {
+                                    if (!LimpiaTablasSV(TipoInfo))
+                                    {
+                                        ErrorRecepcion();
+                                    }
+                                    pgbrCargaVencimientos.Value = 70;
+                                    if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
+                                    {
+                                        ErrorRecepcion();
+                                    }
+                                }
+                                else
+                                {
+                                    lblNumVencimHO.Text = "Registros procesados : 0";
+                                    Message("Error en la integridad de los vencimientos");
+                                    return ErrorProceso();
+                                }
+                                break;
                         }
+                        
                     }
                     else
                     {
@@ -361,7 +365,7 @@ namespace Interfaz_SaldosDiarios
 
                     do
                     {
-                        lsQuery = "INSERT INTO SALDOS_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) VALUES (@agencia, @cuenta_cliente, @sufijo, @saldo, @interes, @cuenta_bloqueada, @fecha_generacion, @numero_registros, @fin_registro);";
+                        lsQuery = "INSERT INTO SALDOS_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) VALUES ('@agencia', '@cuenta_cliente', '@sufijo', '@saldo', '@interes', '@cuenta_bloqueada', '@fecha_generacion', '@numero_registros', '@fin_registro');";
                         
                         OdbcParameter[] parameters = new OdbcParameter[] {
                             new OdbcParameter("@agencia", cargaSaldo[lnIndice].Agencia.ToString()),
@@ -629,20 +633,20 @@ namespace Interfaz_SaldosDiarios
                             {
                                 return IntegrityFile;
                             }
-                            //Saldo
-                            saldo = laSaldos[noRegistros].SaldoIniDia.ToString();
-                            saldo = saldo.Replace(" -.", "-0."); // Línea que corrige el problema de los números negativos
-                            if (saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14).Trim() != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
-                            {
-                                return IntegrityFile;
-                            }
-                            //Interes
-                            interes = laSaldos[noRegistros].InteresDia.ToString();
-                            interes = interes.Replace(" -.", "-0.");
-                            if (interes.Trim() == "" || (!IsNumeric(Funcion.Mid(interes, 1, 14)) && Funcion.Mid(interes, 1, 14) != "") || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
-                            {
-                                return IntegrityFile;
-                            }
+                            ////Saldo
+                            //saldo = laSaldos[noRegistros].SaldoIniDia.ToString();
+                            //saldo = saldo.Replace(" -.", "-0."); // Línea que corrige el problema de los números negativos
+                            //if (saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14).Trim() != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
+                            //{
+                            //    return IntegrityFile;
+                            //}
+                            ////Interes
+                            //interes = laSaldos[noRegistros].InteresDia.ToString();
+                            //interes = interes.Replace(" -.", "-0.");
+                            //if (interes.Trim() == "" || (!IsNumeric(Funcion.Mid(interes, 1, 14)) && Funcion.Mid(interes, 1, 14) != "") || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
+                            //{
+                            //    return IntegrityFile;
+                            //}
                             //Cuenta bloqueada
                             cuenta_bloqueada = laSaldos[noRegistros].SwitchBloqueo.Trim();
                             if (cuenta_bloqueada == "" || (cuenta_bloqueada != "Y" && cuenta_bloqueada != "N"))
@@ -915,7 +919,7 @@ namespace Interfaz_SaldosDiarios
                     return FiltraCadena;
                 }
 
-                FiltraCadena = new Regex(@"^[a-zA-Z0-9.,-/()]+$").Match(cadena).Success;
+                FiltraCadena = new Regex(@"^[a-zA-Z0-9., -/:()]+$").Match(cadena).Success;
                 
                 if(!FiltraCadena)
                 {
@@ -984,7 +988,7 @@ namespace Interfaz_SaldosDiarios
 
                 int resultado = bd.ejecutarActualizacionParametros(ls_QueryActualiza, parametros_1);
 
-                ActValorTransfer = (resultado > 0) ? false : true;
+                ActValorTransfer = (resultado > 0) ? true : false;
             }
             catch (Exception ex)
             {
@@ -1017,7 +1021,7 @@ namespace Interfaz_SaldosDiarios
 
 
                 ls_FechaDiaActual = Funcion.InvierteFecha(maps[0].GetString(), false);
-                main.Fecha_Int = DateTime.Parse(ls_fechaoperacion).ToString("MM-dd-yy");
+                main.Fecha_Int = DateTime.Parse(ls_fechaoperacion).ToString("MM-dd-yyyy");
 
                 //Verifica si hoy es festivo...
                 string tmp_fecha = DateTime.Parse(ls_fechaoperacion).ToString("yyyy-MM-dd") + " 00:00:00.000";

@@ -168,7 +168,10 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
             {
                 OdbcCommand DbCommand = DbConnection.CreateCommand();
                 DbCommand.CommandText = query;
-                DbCommand.Parameters.Add(parametros);
+                foreach (OdbcParameter parametro in parametros)
+                {
+                    DbCommand.Parameters.Add(parametro);
+                }
                 int afectados = DbCommand.ExecuteNonQuery();
 
                 return afectados;
