@@ -24,6 +24,8 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
         string gsPswdDB;
         string gsNameDB;
 
+        public int registros_procesados;
+
         public FuncionesBD(string cnn) : base(cnn)
         {
             encriptacion = new Encriptacion();
@@ -74,8 +76,9 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
         }
 
 
-        public int transaccionInsert(List<String> querys)
+        public int transaccionInsert(List<QueryParametro> querys)
         {
+            registros_procesados = 0;
             using (SqlConnection connection = new SqlConnection(this.connectionString))
             {
                 connection.Open();
@@ -88,18 +91,26 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
                 command.Connection = connection;
                 command.Transaction = transaction;
 
+
                 try
                 {
 
-                    foreach (String query in querys)
+                    foreach (QueryParametro query in querys)
                     {
-                        command.CommandText = query; Log.Escribe(query, "Query:");
+                        command.Parameters.Clear();
+                        command.CommandText = query.Query;
+                        foreach (SqlParameter parametro in query.Parametros)
+                        {
+                            command.Parameters.Add(parametro);
+                        }
+                        registros_procesados++;
+                        if (registros_procesados > 3) break; //[pruebas]
                         command.ExecuteNonQuery();
-
                     }
 
                     transaction.Commit();
                     Log.Escribe("records are written to database.");
+                    return registros_procesados;
                 }
                 catch (Exception ex)
                 {
@@ -108,16 +119,16 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
                     try
                     {
                         transaction.Rollback();
+                        return -1;
                     }
                     catch (Exception ex2)
                     {
                         Log.Escribe("Rollback Exception");
                         Log.Escribe(ex2);
+                        return -1;
                     }
                 }
             }
-
-            return 1;
         }
 
         public List<Map> LLenarMapToQuery(List<Map> maps, SqlDataReader dr)

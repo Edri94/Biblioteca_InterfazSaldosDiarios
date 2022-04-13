@@ -287,14 +287,13 @@ namespace Interfaz_SaldosDiarios
                                     if (!CargaArchivosHO(maSaldos, maVencimientos, TipoInfo, lnContador))
                                     {
                                         ErrorRecepcion();
-                                    }
-                                    else
-                                    {
-                                        lblNumSaldosHO.Text = ("Registros procesados : 0");
-                                        Message("Error en la integridad de los saldos");
-                                        return ErrorProceso();
-                                    }
-
+                                    }                               
+                                }
+                                else
+                                {
+                                    lblNumSaldosHO.Text = ("Registros procesados : 0");
+                                    Message("Error en la integridad de los saldos");
+                                    return ErrorProceso();
                                 }
                                 break;
                             case 2:
@@ -327,6 +326,7 @@ namespace Interfaz_SaldosDiarios
                         ErrorProceso();
                     }
                 }
+                ProcesaInfo = true;
             }
             catch (Exception ex)
             {
@@ -363,29 +363,32 @@ namespace Interfaz_SaldosDiarios
                     lnIndice = 0;
                     Message("Cargando Archivo de Saldos de Houston...");
 
+                    List<QueryParametro> querys = new List<QueryParametro>();
+
                     do
                     {
-                        lsQuery = "INSERT INTO SALDOS_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) VALUES ('@agencia', '@cuenta_cliente', '@sufijo', '@saldo', '@interes', '@cuenta_bloqueada', '@fecha_generacion', '@numero_registros', '@fin_registro');";
-                        
-                        OdbcParameter[] parameters = new OdbcParameter[] {
-                            new OdbcParameter("@agencia", cargaSaldo[lnIndice].Agencia.ToString()),
-                            new OdbcParameter("@cuenta_cliente", cargaSaldo[lnIndice].NumCuenta.ToString()),
-                            new OdbcParameter("@sufijo", cargaSaldo[lnIndice].SufijoCuenta.ToString()),
-                            new OdbcParameter("@saldo", cargaSaldo[lnIndice].SaldoIniDia.ToString()),
-                            new OdbcParameter("@interes", cargaSaldo[lnIndice].InteresDia.ToString()),
-                            new OdbcParameter("@cuenta_bloqueada", cargaSaldo[lnIndice].SwitchBloqueo.ToString()),
-                            new OdbcParameter("@fecha_generacion",cargaSaldo[lnIndice].FechaGenSaldo.ToString()),
-                            new OdbcParameter("@numero_registros", cargaSaldo[lnIndice].NumRegistros.ToString()),
-                            new OdbcParameter("@fin_registro",cargaSaldo[lnIndice].FinRegistro.ToString()),
+                        lsQuery = "INSERT INTO TICKET.Transferencia.SALDOS_KAPITI_1(agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) VALUES (@agencia, @cuenta_cliente, @sufijo, @saldo, @interes, @cuenta_bloqueada, @fecha_generacion, @numero_registros, @fin_registro);";
+
+                        SqlParameter[] parameters = new SqlParameter[] {
+                                new SqlParameter("@agencia",SqlDbType.VarChar, 4) { Value = cargaSaldo[lnIndice].Agencia.ToString() },
+                                new SqlParameter("@cuenta_cliente",SqlDbType.VarChar, 6) { Value = cargaSaldo[lnIndice].NumCuenta.ToString() },
+                                new SqlParameter("@sufijo",SqlDbType.VarChar, 3) { Value = cargaSaldo[lnIndice].SufijoCuenta.ToString() },
+                                new SqlParameter("@saldo",SqlDbType.VarChar, 17) { Value = cargaSaldo[lnIndice].SaldoIniDia.ToString() },
+                                new SqlParameter("@interes",SqlDbType.VarChar, 11) { Value = cargaSaldo[lnIndice].InteresDia.ToString() },
+                                new SqlParameter("@cuenta_bloqueada",SqlDbType.VarChar, 1) { Value = cargaSaldo[lnIndice].SwitchBloqueo.ToString() },
+                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 10) { Value = cargaSaldo[lnIndice].FechaGenSaldo.ToString() },
+                                new SqlParameter("@numero_registros",SqlDbType.VarChar, 8) { Value = cargaSaldo[lnIndice].NumRegistros.ToString() },
+                                new SqlParameter("@fin_registro",SqlDbType.VarChar, 1) { Value = cargaSaldo[lnIndice].FinRegistro.ToString() },
                         };
 
-                        as400.EjecutaActualizacion(lsQuery, parameters);
-
-                        Message($"Cargando saldo :{lnIndice}, en la base de datos");
-                        ActualizaProgreso(ref pgbrCargaSaldos, 70, 95, lnIndice, NumRegistros);
+                        querys.Add(new QueryParametro { Query = lsQuery, Parametros = parameters });
+                        Message($"Añadiendo el saldo {lnIndice}  a la cola");
+                        //ActualizaProgreso(ref pgbrCargaSaldos, 70, 95, lnIndice, NumRegistros);
                         lnIndice++;
 
                     } while (lnIndice <= NumRegistros);
+
+                    CargaArchivosHO = (bd.transaccionInsert(querys) != -1)? true : false;
 
                     lblNumSaldosHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
                     Message("Carga de Saldos de Houston Terminada...");
@@ -402,21 +405,21 @@ namespace Interfaz_SaldosDiarios
 
                         do
                         {
-                            lsQuery = "INSERT INTO SALDOS_CD_KAPITI_1 (deal_reference, agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) VALUES (@deal_reference, @agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
+                            lsQuery = "INSERT INTO SALDOS_CD_KAPITI_1(deal_reference, agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) VALUES (@deal_reference, @agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
 
-                            OdbcParameter[] parameters = new OdbcParameter[] {
-                                new OdbcParameter("@deal_reference", cargaVenc[lnIndice].Ticket.ToString()),
-                                new OdbcParameter("@agencia", cargaVenc[lnIndice].Agencia.ToString()),
-                                new OdbcParameter("@cuenta_cliente", cargaVenc[lnIndice].NumCuenta.ToString()),
-                                new OdbcParameter("@sufijo", cargaVenc[lnIndice].SufijoCuenta.ToString()),
-                                new OdbcParameter("@saldo", cargaVenc[lnIndice].Saldo.ToString()),
-                                new OdbcParameter("@fecha_generacion", cargaVenc[lnIndice].FechaVen.ToString()),
-                                new OdbcParameter("@numero_registros",cargaVenc[lnIndice].NumRegistros.ToString()),
-                                new OdbcParameter("@intereses", cargaVenc[lnIndice].Intereses.ToString()),
-                                new OdbcParameter("@fin_registro",cargaVenc[lnIndice].FinRegistro.ToString()),
+                            SqlParameter[] parameters = new SqlParameter[] {
+                                new SqlParameter("@deal_reference",SqlDbType.VarChar, 11) { Value = 8009 },
+                                new SqlParameter("@agencia",SqlDbType.VarChar, 4) { Value = 8009 },
+                                new SqlParameter("@cuenta_cliente",SqlDbType.VarChar, 6) { Value = 8009 },
+                                new SqlParameter("@sufijo",SqlDbType.VarChar, 3) { Value = 8009 },
+                                new SqlParameter("@saldo",SqlDbType.VarChar, 17) { Value = 8009 },
+                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 11) { Value = 8009 },
+                                new SqlParameter("@numero_registros",SqlDbType.VarChar, 11) { Value = 8009 },
+                                new SqlParameter("@intereses",SqlDbType.VarChar, 17) { Value = 8009 },
+                                new SqlParameter("@fin_registro",SqlDbType.VarChar, 11) { Value = 8009 },
                             };
 
-                            as400.EjecutaActualizacion(lsQuery, parameters);
+                            bd.ejecutarActualizacionParametros(lsQuery, parameters);
 
                             Message($"Cargando vencimiento :{lnIndice}, en la base de datos");
                             ActualizaProgreso(ref pgbrCargaVencimientos, 70, 95, lnIndice, NumRegistros);
@@ -427,7 +430,6 @@ namespace Interfaz_SaldosDiarios
                         lblNumVencimHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
                         Message("Carga de Vencimientos de Houston Terminada...");                   
                 }
-                CargaArchivosHO = true;
                 return CargaArchivosHO;
             }
             catch (Exception ex)
