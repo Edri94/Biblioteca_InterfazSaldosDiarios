@@ -382,13 +382,18 @@ namespace Interfaz_SaldosDiarios
                         };
 
                         querys.Add(new QueryParametro { Query = lsQuery, Parametros = parameters });
-                        Message($"Añadiendo el saldo {lnIndice}  a la cola");
-                        //ActualizaProgreso(ref pgbrCargaSaldos, 70, 95, lnIndice, NumRegistros);
+                        Message($"Añadiendo el saldo {lnIndice}  a la cola para cargar a la base de datos");
                         lnIndice++;
 
                     } while (lnIndice <= NumRegistros);
 
-                    CargaArchivosHO = (bd.transaccionInsert(querys) != -1)? true : false;
+                    CargaArchivosHO = (transaccionInsert(querys) != -1) ? true : false;
+                    
+                    //Task.Run(async () =>
+                    //{
+                    //    CargaArchivosHO = (await Task.Run(() => bd.transaccionInsert(querys)) > 1)? true: false;
+                    //}).GetAwaiter().GetResult();
+
 
                     lblNumSaldosHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
                     Message("Carga de Saldos de Houston Terminada...");
@@ -420,9 +425,7 @@ namespace Interfaz_SaldosDiarios
                             };
 
                             bd.ejecutarActualizacionParametros(lsQuery, parameters);
-
-                            Message($"Cargando vencimiento :{lnIndice}, en la base de datos");
-                            ActualizaProgreso(ref pgbrCargaVencimientos, 70, 95, lnIndice, NumRegistros);
+                            Message($"Cargando saldos :{lnIndice}, en la base de datos");                           
                             lnIndice++;
 
                         } while (lnIndice <= NumRegistros);
@@ -436,6 +439,64 @@ namespace Interfaz_SaldosDiarios
             {
                 Log.Escribe(ex);
                 return CargaArchivosHO;
+            }
+        }
+
+        public int transaccionInsert(List<QueryParametro> querys)
+        {
+            int registros_procesados = 0;
+            using (SqlConnection connection = new SqlConnection(bd.connectionString))
+            {
+                connection.Open();
+
+                SqlCommand command = connection.CreateCommand();
+                SqlTransaction transaction;
+
+                transaction = connection.BeginTransaction("transaccionInsert");
+
+                command.Connection = connection;
+                command.Transaction = transaction;
+
+
+                try
+                {
+
+                    foreach (QueryParametro query in querys)
+                    {
+                        Message($"Cargando el saldo {registros_procesados}  a la base de datos");
+
+                        command.Parameters.Clear();
+                        command.CommandText = query.Query;
+                        foreach (SqlParameter parametro in query.Parametros)
+                        {
+                            command.Parameters.Add(parametro);
+                        }
+                        registros_procesados++;
+                        //if (registros_procesados > 3) break; //[pruebas]
+                        command.ExecuteNonQuery();
+                        ActualizaProgreso(ref pgbrCargaSaldos, 10, 40, registros_procesados, querys.Count);
+                    }
+
+                    transaction.Commit();
+                    Log.Escribe("records are written to database.");
+                    return registros_procesados;
+                }
+                catch (Exception ex)
+                {
+                    Log.Escribe("Commit Exception");
+                    Log.Escribe(ex);
+                    try
+                    {
+                        transaction.Rollback();
+                        return -1;
+                    }
+                    catch (Exception ex2)
+                    {
+                        Log.Escribe("Rollback Exception");
+                        Log.Escribe(ex2);
+                        return -1;
+                    }
+                }
             }
         }
 
@@ -1198,6 +1259,11 @@ namespace Interfaz_SaldosDiarios
         public static bool IsNumeric(string value)
         {
             return value.All(char.IsNumber);
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

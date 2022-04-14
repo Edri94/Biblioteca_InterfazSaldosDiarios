@@ -60,9 +60,13 @@ namespace Interfaz_SaldosDiarios
             this.pgbrCargaSaldos = new System.Windows.Forms.ProgressBar();
             this.label9 = new System.Windows.Forms.Label();
             this.txtConsola = new System.Windows.Forms.TextBox();
+            this.pictureCargaSaldos = new System.Windows.Forms.PictureBox();
+            this.pictureCargaVencimientos = new System.Windows.Forms.PictureBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureCargaSaldos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureCargaVencimientos)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -286,6 +290,8 @@ namespace Interfaz_SaldosDiarios
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.pictureCargaVencimientos);
+            this.groupBox3.Controls.Add(this.pictureCargaSaldos);
             this.groupBox3.Controls.Add(this.lblNumVencimHO);
             this.groupBox3.Controls.Add(this.lblNumSaldosHO);
             this.groupBox3.Controls.Add(this.label10);
@@ -328,14 +334,14 @@ namespace Interfaz_SaldosDiarios
             // 
             // pgbrCargaVencimientos
             // 
-            this.pgbrCargaVencimientos.Location = new System.Drawing.Point(343, 73);
+            this.pgbrCargaVencimientos.Location = new System.Drawing.Point(343, 80);
             this.pgbrCargaVencimientos.Name = "pgbrCargaVencimientos";
             this.pgbrCargaVencimientos.Size = new System.Drawing.Size(308, 23);
             this.pgbrCargaVencimientos.TabIndex = 1;
             // 
             // pgbrCargaSaldos
             // 
-            this.pgbrCargaSaldos.Location = new System.Drawing.Point(11, 73);
+            this.pgbrCargaSaldos.Location = new System.Drawing.Point(11, 80);
             this.pgbrCargaSaldos.Name = "pgbrCargaSaldos";
             this.pgbrCargaSaldos.Size = new System.Drawing.Size(308, 23);
             this.pgbrCargaSaldos.TabIndex = 1;
@@ -362,6 +368,30 @@ namespace Interfaz_SaldosDiarios
             this.txtConsola.Size = new System.Drawing.Size(669, 100);
             this.txtConsola.TabIndex = 3;
             // 
+            // pictureCargaSaldos
+            // 
+            this.pictureCargaSaldos.Image = global::Interfaz_SaldosDiarios.Properties.Resources.loading_buffering;
+            this.pictureCargaSaldos.Location = new System.Drawing.Point(269, 25);
+            this.pictureCargaSaldos.Name = "pictureCargaSaldos";
+            this.pictureCargaSaldos.Size = new System.Drawing.Size(50, 47);
+            this.pictureCargaSaldos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureCargaSaldos.TabIndex = 5;
+            this.pictureCargaSaldos.TabStop = false;
+            this.pictureCargaSaldos.Visible = false;
+            this.pictureCargaSaldos.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
+            // pictureCargaVencimientos
+            // 
+            this.pictureCargaVencimientos.Image = global::Interfaz_SaldosDiarios.Properties.Resources.loading_buffering;
+            this.pictureCargaVencimientos.Location = new System.Drawing.Point(601, 27);
+            this.pictureCargaVencimientos.Name = "pictureCargaVencimientos";
+            this.pictureCargaVencimientos.Size = new System.Drawing.Size(50, 47);
+            this.pictureCargaVencimientos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureCargaVencimientos.TabIndex = 5;
+            this.pictureCargaVencimientos.TabStop = false;
+            this.pictureCargaVencimientos.Visible = false;
+            this.pictureCargaVencimientos.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -381,6 +411,8 @@ namespace Interfaz_SaldosDiarios
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureCargaSaldos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureCargaVencimientos)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -419,6 +451,8 @@ namespace Interfaz_SaldosDiarios
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox txtConsola;
+        private System.Windows.Forms.PictureBox pictureCargaSaldos;
+        private System.Windows.Forms.PictureBox pictureCargaVencimientos;
     }
 }
 

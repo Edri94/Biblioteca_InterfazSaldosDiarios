@@ -14,7 +14,7 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
     {
         public ConexionBD cnnConexion;
         SqlConnection connection;
-        String connectionString;
+        public String connectionString;
         Encriptacion encriptacion;
 
         string gsCataDB;
@@ -104,7 +104,7 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
                             command.Parameters.Add(parametro);
                         }
                         registros_procesados++;
-                        if (registros_procesados > 3) break; //[pruebas]
+                        //if (registros_procesados > 3) break; //[pruebas]
                         command.ExecuteNonQuery();
                     }
 
