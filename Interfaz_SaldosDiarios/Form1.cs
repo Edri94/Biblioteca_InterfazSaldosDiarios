@@ -98,6 +98,7 @@ namespace Interfaz_SaldosDiarios
 
         private void RecibeArchivos()
         {
+            
             pgbrCargaSaldos.Value = 5;
             if (mnBanderaSHO == 0)
             {
@@ -235,7 +236,7 @@ namespace Interfaz_SaldosDiarios
 
                                     lnContador++;
                                     txtStatusInterfaz.Text = $"Recibiendo Saldos HO. ({lnContador} Registros)";
-                                    ActualizaProgreso(ref pgbrCargaSaldos, 10, 40, lnContador, lnNumRegistros);
+                                    ActualizaProgreso(ref pgbrCargaSaldos, 40, lnContador, lnNumRegistros);
 
                                     maSaldos.Add(saldo);
                                     break;
@@ -256,7 +257,7 @@ namespace Interfaz_SaldosDiarios
 
                                     lnContador++;
                                     txtStatusInterfaz.Text = $"Recibiendo Vencimientos HO. ({lnContador} Registros)";
-                                    ActualizaProgreso(ref pgbrCargaVencimientos, 10, 40, lnContador, lnNumRegistros);
+                                    ActualizaProgreso(ref pgbrCargaVencimientos, 40, lnContador, lnNumRegistros);
 
                                     maVencimientos.Add(vencim);
                                     break;
@@ -474,7 +475,7 @@ namespace Interfaz_SaldosDiarios
                         registros_procesados++;
                         //if (registros_procesados > 3) break; //[pruebas]
                         command.ExecuteNonQuery();
-                        ActualizaProgreso(ref pgbrCargaSaldos, 10, 40, registros_procesados, querys.Count);
+                        ActualizaProgreso(ref pgbrCargaSaldos, 40, registros_procesados, querys.Count);
                     }
 
                     transaction.Commit();
@@ -749,7 +750,7 @@ namespace Interfaz_SaldosDiarios
                             {
                                 return IntegrityFile;
                             }
-                            ActualizaProgreso(ref pgbrCargaSaldos, 50, 70, noRegistros, NumReg);
+                            ActualizaProgreso(ref pgbrCargaSaldos, 70, noRegistros, NumReg);
                             noRegistros++;
 
                         } while (noRegistros <= NumReg);
@@ -871,7 +872,7 @@ namespace Interfaz_SaldosDiarios
                                 return IntegrityFile;
                             }
 
-                            ActualizaProgreso(ref pgbrCargaVencimientos, 50, 70, noRegistros, NumReg);
+                            ActualizaProgreso(ref pgbrCargaVencimientos, 70, noRegistros, NumReg);
                             noRegistros++;
 
                         } while (noRegistros <= NumReg);
@@ -998,9 +999,15 @@ namespace Interfaz_SaldosDiarios
             }
         }
 
-        private void ActualizaProgreso(ref ProgressBar progBar, int PorcIniBar, int PorcMaxBar, int NumIteracion, int TotalItercion)
+        private void ActualizaProgreso(ref ProgressBar progBar,  int PorcMaxBar, int NumIteracion, int TotalItercion)
         {
-            int x, xiter;
+            //NOTA:
+            //Hacer calculo a partir de cuanto lleva el progresbbar ya cargado, y cuantoo quiero que cargue soalemnte, suponiendo que la carga ya lleva 20%, y ahora 
+            //solo quiero cargar otro 40%, ahora debo ir calculando a partir de un numetro total de registros  donde el 100% es el 40% q qiuero cargar (hazte bolas tu alan del futuro con estos calculos complejos) e ir calculando
+            //hasta llegar al 100% que es igual al 40% q quiero cargar
+            int PorcIniBar = progBar.Value;
+
+            double x, xiter;
 
             if(TotalItercion > 0 && PorcMaxBar > 0 && NumIteracion > 0)
             {
@@ -1016,7 +1023,7 @@ namespace Interfaz_SaldosDiarios
 
                     if(x > PorcIniBar && x <= PorcMaxBar && progBar.Value < x)
                     {
-                        progBar.Value = x;
+                        progBar.Value = (int)x;
                     }
                 }
             }
