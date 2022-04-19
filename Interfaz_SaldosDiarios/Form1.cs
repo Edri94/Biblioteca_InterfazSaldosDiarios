@@ -98,8 +98,8 @@ namespace Interfaz_SaldosDiarios
 
         private void RecibeArchivos()
         {
-            
-            pgbrCargaSaldos.Value = 5;
+            //Saldos
+            ActualizaProgreso(ref pgbrCargaSaldos, 5, 1, 1, 0);
             if (mnBanderaSHO == 0)
             {
                 if (ProcesaInfo(1))
@@ -116,11 +116,11 @@ namespace Interfaz_SaldosDiarios
             {
                 Message("Carga de saldos relizada previamente...");
             }
+            ActualizaProgreso(ref pgbrCargaSaldos, 100, 1, 1, 0);
 
-            pgbrCargaSaldos.Value = 100;
-
-            pgbrCargaVencimientos.Value = 5;
-            if(mnBanderaVHO == 0)
+            //Vencimientos
+            ActualizaProgreso(ref pgbrCargaVencimientos, 5, 1, 1, 0);
+            if (mnBanderaVHO == 0)
             {
                 if(ProcesaInfo(2))
                 {
@@ -135,7 +135,7 @@ namespace Interfaz_SaldosDiarios
             {
                 Message("Error al actualizar la bandera transfer_venc_ho = 1");
             }
-            pgbrCargaVencimientos.Value = 100;
+            ActualizaProgreso(ref pgbrCargaVencimientos, 100, 1, 1, 0);
 
             Message("DECONECTADO");
         }
@@ -183,12 +183,12 @@ namespace Interfaz_SaldosDiarios
                 {
                     case 1:
                         lblNumSaldosHO.Text = "Registros a procesar : " + lnNumRegistros;
-                        pgbrCargaSaldos.Value = 10;
-                    break;
+                        ActualizaProgreso(ref pgbrCargaSaldos, 10, 1, 1, 5);
+                        break;
                     case 2:
                         lblNumVencimHO.Text = "Registros a procesar : " + lnNumRegistros;
-                        pgbrCargaVencimientos.Value = 10;
-                    break;
+                        ActualizaProgreso(ref pgbrCargaVencimientos, 10, 1, 1, 5);
+                        break;
                 }
 
                 if (lnNumRegistros > 0)
@@ -236,7 +236,7 @@ namespace Interfaz_SaldosDiarios
 
                                     lnContador++;
                                     txtStatusInterfaz.Text = $"Recibiendo Saldos HO. ({lnContador} Registros)";
-                                    ActualizaProgreso(ref pgbrCargaSaldos, 40, lnContador, lnNumRegistros);
+                                    ActualizaProgreso(ref pgbrCargaSaldos, 35, lnContador, lnNumRegistros, 15);
 
                                     maSaldos.Add(saldo);
                                     break;
@@ -257,7 +257,7 @@ namespace Interfaz_SaldosDiarios
 
                                     lnContador++;
                                     txtStatusInterfaz.Text = $"Recibiendo Vencimientos HO. ({lnContador} Registros)";
-                                    ActualizaProgreso(ref pgbrCargaVencimientos, 40, lnContador, lnNumRegistros);
+                                    ActualizaProgreso(ref pgbrCargaVencimientos, 35, lnContador, lnNumRegistros, 15);
 
                                     maVencimientos.Add(vencim);
                                     break;
@@ -300,7 +300,7 @@ namespace Interfaz_SaldosDiarios
                             case 2:
                                 txtStatusInterfaz.Text = "Verificando integridad de los vencimientos...";
 
-                                if (IntegrityFile(maSaldos, maVencimientos, gsFechaArchivo, TipoInfo, lnContador))
+                                if (IntegrityFile(maSaldos, maVencimientos, Funcion.InvierteFecha(gsFechaArchivo, false), TipoInfo, lnContador))
                                 {
                                     if (!LimpiaTablasSV(TipoInfo))
                                     {
@@ -353,6 +353,8 @@ namespace Interfaz_SaldosDiarios
             int lnIndice = 0;
             string lsQuery;
             bool CargaArchivosHO = false;
+            List<QueryParametro> querys = new List<QueryParametro>();
+
             try
             {
                 if(tipo == 1)
@@ -363,8 +365,6 @@ namespace Interfaz_SaldosDiarios
                     }
                     lnIndice = 0;
                     Message("Cargando Archivo de Saldos de Houston...");
-
-                    List<QueryParametro> querys = new List<QueryParametro>();
 
                     do
                     {
@@ -388,7 +388,8 @@ namespace Interfaz_SaldosDiarios
 
                     } while (lnIndice <= NumRegistros);
 
-                    CargaArchivosHO = (transaccionInsert(querys) != -1) ? true : false;
+                    txtStatusInterfaz.Text = "Cargando Saldos a la base de datos";
+                    CargaArchivosHO = (transaccionInsert(querys, ref pgbrCargaSaldos) != -1) ? true : false;
                     
                     //Task.Run(async () =>
                     //{
@@ -411,28 +412,31 @@ namespace Interfaz_SaldosDiarios
 
                         do
                         {
-                            lsQuery = "INSERT INTO SALDOS_CD_KAPITI_1(deal_reference, agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) VALUES (@deal_reference, @agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
+                            lsQuery = "INSERT INTO TICKET.Transferencia.SALDOS_CD_KAPITI_1(deal_reference, agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) VALUES (@deal_reference, @agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
 
                             SqlParameter[] parameters = new SqlParameter[] {
-                                new SqlParameter("@deal_reference",SqlDbType.VarChar, 11) { Value = 8009 },
-                                new SqlParameter("@agencia",SqlDbType.VarChar, 4) { Value = 8009 },
-                                new SqlParameter("@cuenta_cliente",SqlDbType.VarChar, 6) { Value = 8009 },
-                                new SqlParameter("@sufijo",SqlDbType.VarChar, 3) { Value = 8009 },
-                                new SqlParameter("@saldo",SqlDbType.VarChar, 17) { Value = 8009 },
-                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 11) { Value = 8009 },
-                                new SqlParameter("@numero_registros",SqlDbType.VarChar, 11) { Value = 8009 },
-                                new SqlParameter("@intereses",SqlDbType.VarChar, 17) { Value = 8009 },
-                                new SqlParameter("@fin_registro",SqlDbType.VarChar, 11) { Value = 8009 },
+                                new SqlParameter("@deal_reference",SqlDbType.VarChar, 7) { Value = cargaVenc[lnIndice].Ticket.ToString() },
+                                new SqlParameter("@agencia",SqlDbType.VarChar, 4) { Value = cargaVenc[lnIndice].Agencia.ToString() },
+                                new SqlParameter("@cuenta_cliente",SqlDbType.VarChar, 6) { Value = cargaVenc[lnIndice].NumCuenta.ToString() },
+                                new SqlParameter("@sufijo",SqlDbType.VarChar, 3) { Value = cargaVenc[lnIndice].SufijoCuenta.ToString() },
+                                new SqlParameter("@saldo",SqlDbType.VarChar, 17) { Value = cargaVenc[lnIndice].Saldo.ToString() },
+                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 10) { Value = cargaVenc[lnIndice].FechaVen.ToString() },
+                                new SqlParameter("@numero_registros",SqlDbType.VarChar, 8) { Value = cargaVenc[lnIndice].NumRegistros.ToString() },
+                                new SqlParameter("@intereses",SqlDbType.VarChar, 17) { Value = cargaVenc[lnIndice].Intereses.ToString() },
+                                new SqlParameter("@fin_registro",SqlDbType.VarChar, 1) { Value = cargaVenc[lnIndice].FinRegistro.ToString() },
                             };
 
-                            bd.ejecutarActualizacionParametros(lsQuery, parameters);
-                            Message($"Cargando saldos :{lnIndice}, en la base de datos");                           
+                            querys.Add(new QueryParametro { Query = lsQuery, Parametros = parameters });
+                            Message($"Añadiendo el saldo {lnIndice}  a la cola para cargar a la base de datos");
                             lnIndice++;
 
-                        } while (lnIndice <= NumRegistros);
+                    } while (lnIndice <= NumRegistros);
 
-                        lblNumVencimHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
-                        Message("Carga de Vencimientos de Houston Terminada...");                   
+                    txtStatusInterfaz.Text = "Cargando Vencimientos a la base de datos";
+                    CargaArchivosHO = (transaccionInsert(querys, ref pgbrCargaVencimientos) != -1) ? true : false;
+
+                    lblNumVencimHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
+                    Message("Carga de Vencimientos de Houston Terminada...");                   
                 }
                 return CargaArchivosHO;
             }
@@ -443,7 +447,7 @@ namespace Interfaz_SaldosDiarios
             }
         }
 
-        public int transaccionInsert(List<QueryParametro> querys)
+        public int transaccionInsert(List<QueryParametro> querys, ref ProgressBar pgbr)
         {
             int registros_procesados = 0;
             using (SqlConnection connection = new SqlConnection(bd.connectionString))
@@ -475,7 +479,10 @@ namespace Interfaz_SaldosDiarios
                         registros_procesados++;
                         //if (registros_procesados > 3) break; //[pruebas]
                         command.ExecuteNonQuery();
-                        ActualizaProgreso(ref pgbrCargaSaldos, 40, registros_procesados, querys.Count);
+
+                        ActualizaProgreso(ref pgbr, 30, registros_procesados, querys.Count, 70);
+
+                        
                     }
 
                     transaction.Commit();
@@ -750,7 +757,7 @@ namespace Interfaz_SaldosDiarios
                             {
                                 return IntegrityFile;
                             }
-                            ActualizaProgreso(ref pgbrCargaSaldos, 70, noRegistros, NumReg);
+                            ActualizaProgreso(ref pgbrCargaSaldos, 10, noRegistros, NumReg, 50);
                             noRegistros++;
 
                         } while (noRegistros <= NumReg);
@@ -820,14 +827,14 @@ namespace Interfaz_SaldosDiarios
                                 return IntegrityFile;
                             }
 
-                            //Saldo
+                            ////Saldo
                             saldo = laVencim[noRegistros].Saldo.ToString();
-                            saldo = saldo.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
+                            //saldo = saldo.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
 
-                            if(saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14) != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
-                            {
-                                return IntegrityFile;
-                            }
+                            //if(saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14) != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
+                            //{
+                            //    return IntegrityFile;
+                            //}
 
                             // Fecha Generacion
                             fecha_generacion = laVencim[noRegistros].FechaVen.ToString();
@@ -860,11 +867,11 @@ namespace Interfaz_SaldosDiarios
 
                             //Intereses
                             interes = laVencim[noRegistros].Intereses.ToString();
-                            interes = interes.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
-                            if(interes == "" || (!IsNumeric(Funcion.Mid(interes,1,14)) && Funcion.Mid(interes, 1, 14) != "") || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
-                            {
-                                return IntegrityFile;
-                            }
+                            //interes = interes.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
+                            //if(interes == "" || (!IsNumeric(Funcion.Mid(interes,1,14)) && Funcion.Mid(interes, 1, 14) != "") || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
+                            //{
+                            //    return IntegrityFile;
+                            //}
                             // Fin de registros
                             fin_registro = laVencim[noRegistros].FinRegistro.Trim();
                             if(fin_registro != "*")
@@ -872,7 +879,7 @@ namespace Interfaz_SaldosDiarios
                                 return IntegrityFile;
                             }
 
-                            ActualizaProgreso(ref pgbrCargaVencimientos, 70, noRegistros, NumReg);
+                            ActualizaProgreso(ref pgbrCargaVencimientos, 10, noRegistros, NumReg, 50);
                             noRegistros++;
 
                         } while (noRegistros <= NumReg);
@@ -999,35 +1006,11 @@ namespace Interfaz_SaldosDiarios
             }
         }
 
-        private void ActualizaProgreso(ref ProgressBar progBar,  int PorcMaxBar, int NumIteracion, int TotalItercion)
+        private void ActualizaProgreso(ref ProgressBar progBar, int PorcMaxBar, int NumIteracion, int TotalItercion, int porc)
         {
-            //NOTA:
-            //Hacer calculo a partir de cuanto lleva el progresbbar ya cargado, y cuantoo quiero que cargue soalemnte, suponiendo que la carga ya lleva 20%, y ahora 
-            //solo quiero cargar otro 40%, ahora debo ir calculando a partir de un numetro total de registros  donde el 100% es el 40% q qiuero cargar (hazte bolas tu alan del futuro con estos calculos complejos) e ir calculando
-            //hasta llegar al 100% que es igual al 40% q quiero cargar
-            int PorcIniBar = progBar.Value;
-
-            double x, xiter;
-
-            if(TotalItercion > 0 && PorcMaxBar > 0 && NumIteracion > 0)
-            {
-                xiter = ((NumIteracion * 100) / TotalItercion);
-
-                if(xiter > 0)
-                {
-                    if(PorcIniBar < 0)
-                    {
-                        return;
-                    }
-                    x = (PorcMaxBar - PorcIniBar) / (100) * xiter + PorcIniBar;
-
-                    if(x > PorcIniBar && x <= PorcMaxBar && progBar.Value < x)
-                    {
-                        progBar.Value = (int)x;
-                    }
-                }
-            }
-
+            double valor_actual = progBar.Value;
+            double porcentaje_relativo = (NumIteracion * PorcMaxBar) / TotalItercion;
+            progBar.Value = porc + (int)porcentaje_relativo;
         }
 
         private bool ActValorTransfer(int status, int tipo_bandera)
