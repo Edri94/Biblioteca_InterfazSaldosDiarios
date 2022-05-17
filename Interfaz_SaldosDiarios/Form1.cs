@@ -142,6 +142,7 @@ namespace Interfaz_SaldosDiarios
 
         private bool ProcesaInfo(int TipoInfo)
         {
+            //TipoInfo = 2;
             int lnDatos;
             int lnContador;
             int lnNumRegistros;
@@ -219,20 +220,16 @@ namespace Interfaz_SaldosDiarios
                             switch (TipoInfo)
                             {
                                 case 1:
-
-                                    Saldos saldo = new Saldos
-                                    {
-                                        Agencia = Funcion.Left(dr.GetString(0) + Funcion.Space(4), 4),
-                                        NumCuenta = Funcion.Left(dr.GetString(1) + Funcion.Space(6), 6),
-                                        SufijoCuenta = Funcion.Left(dr.GetString(2) + Funcion.Space(3), 3),
-                                        SaldoIniDia = dr.GetFloat(3),
-                                        InteresDia = dr.GetInt32(4),
-                                        SwitchBloqueo = dr.GetString(5),
-                                        FechaGenSaldo = DateTime.Parse(dr.GetString(6)),
-                                        NumRegistros = dr.GetInt32(7),
-                                        FinRegistro = dr.GetString(8)
-
-                                    };
+                                    Saldos saldo = new Saldos();
+                                    saldo.Agencia = Funcion.Left(dr.GetString(0) + Funcion.Space(4), 4);
+                                    saldo.NumCuenta = Funcion.Left(dr.GetString(1) + Funcion.Space(6), 6);
+                                    saldo.SufijoCuenta = Funcion.Left(dr.GetString(2) + Funcion.Space(3), 3);
+                                    saldo.SaldoIniDia = dr.GetFloat(3);
+                                    saldo.InteresDia = dr.GetInt32(4);
+                                    saldo.SwitchBloqueo = dr.GetString(5);
+                                    saldo.FechaGenSaldo = DateTime.Parse(Funcion.InvierteFecha(dr.GetString(6), false));
+                                    saldo.NumRegistros = dr.GetInt32(7);
+                                    saldo.FinRegistro = dr.GetString(8);
 
                                     lnContador++;
                                     txtStatusInterfaz.Text = $"Recibiendo Saldos HO. ({lnContador} Registros)";
@@ -242,18 +239,16 @@ namespace Interfaz_SaldosDiarios
                                     break;
 
                                 case 2:
-                                    Vencim vencim = new Vencim
-                                    {
-                                        Ticket = dr.GetString(0),
-                                        Agencia = dr.GetString(1),
-                                        NumCuenta = dr.GetString(2),
-                                        SufijoCuenta = dr.GetString(3),
-                                        Saldo = dr.GetFloat(4),
-                                        FechaVen = DateTime.Parse(dr.GetString(5)),
-                                        NumRegistros = dr.GetInt32(6),
-                                        Intereses = dr.GetFloat(7),
-                                        FinRegistro = dr.GetString(8)
-                                    };
+                                    Vencim vencim = new Vencim();
+                                    vencim.Ticket = dr.GetString(0);
+                                    vencim.Agencia = dr.GetString(1);
+                                    vencim.NumCuenta = dr.GetString(2);
+                                    vencim.SufijoCuenta = dr.GetString(3);
+                                    vencim.Saldo = dr.GetFloat(4);
+                                    vencim.FechaVen = DateTime.Parse(Funcion.InvierteFecha(dr.GetString(5),false));
+                                    vencim.NumRegistros = dr.GetInt32(6);
+                                    vencim.Intereses = dr.GetFloat(7);
+                                    vencim.FinRegistro = dr.GetString(8);                                 
 
                                     lnContador++;
                                     txtStatusInterfaz.Text = $"Recibiendo Vencimientos HO. ({lnContador} Registros)";
@@ -432,7 +427,7 @@ namespace Interfaz_SaldosDiarios
 
                     } while (lnIndice <= NumRegistros);
 
-                    txtStatusInterfaz.Text = "Cargando Vencimientos a la base de datos";
+                      txtStatusInterfaz.Text = "Cargando Vencimientos a la base de datos";
                     CargaArchivosHO = (transaccionInsert(querys, ref pgbrCargaVencimientos) != -1) ? true : false;
 
                     lblNumVencimHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
@@ -542,7 +537,7 @@ namespace Interfaz_SaldosDiarios
                    
                     if(tipo == 1)  //Es archivo de Saldos
                     {
-                        Ls_Query = "Insert into SALDOS_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) values (@agencia, @cuenta_cliente, @sufijo, @saldo, @interes, @cuenta_bloqueada, @fecha_generacion, @numero_registros, @fin_registro);";
+                        Ls_Query = "Insert into TICKET.Transferencia.SALDOS_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) values (@agencia, @cuenta_cliente, @sufijo, @saldo, @interes, @cuenta_bloqueada, @fecha_generacion, @numero_registros, @fin_registro);";
                         
                         OdbcParameter[] parameters = new OdbcParameter[] { 
                             new OdbcParameter("@agencia", agencia), 
@@ -560,7 +555,7 @@ namespace Interfaz_SaldosDiarios
                     }
                     else //Es archivo de Vencimientos
                     {
-                        Ls_Query = "Insert into SALDOS_CD_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) values (@agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
+                        Ls_Query = "Insert into TICKET.Transferencia.SALDOS_CD_KAPITI_1 (agencia, cuenta_cliente, sufijo, saldo, fecha_generacion, numero_registros, intereses, fin_registro) values (@agencia, @cuenta_cliente, @sufijo, @saldo, @fecha_generacion, @numero_registros, @intereses, @fin_registro);";
                         
                         OdbcParameter[] parameters = new OdbcParameter[] {
                             new OdbcParameter("@agencia", agencia),
@@ -598,22 +593,22 @@ namespace Interfaz_SaldosDiarios
                 {
                     case 1:
                         Message("Limpiando Tabla de Saldos...");
-                        lsQuery = "TRUNCATE TABLE SALDOS_KAPITI";
-                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        lsQuery = "DELETE FROM TICKET.Transferencia.SALDOS_KAPITI WHERE 1 = 1";
+                        afectados = bd.ejecutarDelete(lsQuery);
                         Message("SALDOS_KAPITI Limpia.");
-                        lsQuery = "TRUNCATE TABLE SALDOS_KAPITI_1";
-                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        lsQuery = "DELETE FROM TICKET.Transferencia.SALDOS_KAPITI_1 WHERE 1 = 1";
+                        afectados = bd.ejecutarDelete(lsQuery);
                         Message("SALDOS_KAPITI_1 Limpia.");
                         LimpiaTablasSV = true;
                     break;
 
                     case 2:
                         Message("Limpiando Tabla de Vencimientos...");
-                        lsQuery = "TRUNCATE TABLE SALDOS_CD_KAPITI";
-                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        lsQuery = "DELETE FROM TICKET.Transferencia.SALDOS_CD_KAPITI WHERE 1 = 1";
+                        afectados = bd.ejecutarDelete(lsQuery);
                         Message("SALDOS_CD_KAPITI Limpia.");
-                        lsQuery = "TRUNCATE TABLE SALDOS_CD_KAPITI_1";
-                        afectados = as400.EjecutaActualizacion(lsQuery);
+                        lsQuery = "DELETE FROM TICKET.Transferencia.SALDOS_CD_KAPITI_1 WHERE 1 = 1";
+                        afectados = bd.ejecutarDelete(lsQuery);
                         Message("SALDOS_CD_KAPITI_1 Limpia.");
                         LimpiaTablasSV = true;
                     break;
@@ -1251,9 +1246,30 @@ namespace Interfaz_SaldosDiarios
             return value.All(char.IsNumber);
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
 
+        private void btnSalir_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void txtFechaProceso_Enter(object sender, EventArgs e)
+        {
+            if(txtFechaProceso.Text == "dd-mm-yyyy")
+            {
+                txtFechaProceso.Text = String.Empty;
+            }
+
+            txtFechaProceso.ForeColor = Color.Black;
+        }
+
+        private void txtFechaProceso_Leave(object sender, EventArgs e)
+        {
+            if (txtFechaProceso.Text == String.Empty)
+            {
+                txtFechaProceso.Text = "dd-mm-yyyy";
+            }
+
+            txtFechaProceso.ForeColor = Color.DimGray;
         }
     }
 }

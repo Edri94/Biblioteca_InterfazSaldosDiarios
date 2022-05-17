@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Biblioteca_InterfazSaldosDi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaz_SaldosDiarios", "Interfaz_SaldosDiarios\Interfaz_SaldosDiarios.csproj", "{1F986A24-A363-4E3A-9468-2CAE44DA60A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaz_SaldosDiarios_Automatico", "Interfaz_SaldosDiarios_Automatico\Interfaz_SaldosDiarios_Automatico.csproj", "{F8FF52C9-4DCA-4D63-88A5-BEAE3B682A80}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1F986A24-A363-4E3A-9468-2CAE44DA60A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F986A24-A363-4E3A-9468-2CAE44DA60A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F986A24-A363-4E3A-9468-2CAE44DA60A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8FF52C9-4DCA-4D63-88A5-BEAE3B682A80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8FF52C9-4DCA-4D63-88A5-BEAE3B682A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8FF52C9-4DCA-4D63-88A5-BEAE3B682A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8FF52C9-4DCA-4D63-88A5-BEAE3B682A80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

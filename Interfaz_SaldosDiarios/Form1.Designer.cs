@@ -47,7 +47,6 @@ namespace Interfaz_SaldosDiarios
             this.btnCargaSaldos = new System.Windows.Forms.Button();
             this.txtFechaArchivos = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.txtStatusInterfaz = new System.Windows.Forms.TextBox();
             this.txtFechaProceso = new System.Windows.Forms.TextBox();
@@ -110,7 +109,7 @@ namespace Interfaz_SaldosDiarios
             this.txtBibliotecaAS400.Name = "txtBibliotecaAS400";
             this.txtBibliotecaAS400.ReadOnly = true;
             this.txtBibliotecaAS400.Size = new System.Drawing.Size(182, 26);
-            this.txtBibliotecaAS400.TabIndex = 1;
+            this.txtBibliotecaAS400.TabIndex = 6;
             // 
             // txtDsnAS400
             // 
@@ -118,7 +117,7 @@ namespace Interfaz_SaldosDiarios
             this.txtDsnAS400.Name = "txtDsnAS400";
             this.txtDsnAS400.ReadOnly = true;
             this.txtDsnAS400.Size = new System.Drawing.Size(182, 26);
-            this.txtDsnAS400.TabIndex = 1;
+            this.txtDsnAS400.TabIndex = 5;
             // 
             // txtBaseDeDatos
             // 
@@ -126,7 +125,7 @@ namespace Interfaz_SaldosDiarios
             this.txtBaseDeDatos.Name = "txtBaseDeDatos";
             this.txtBaseDeDatos.ReadOnly = true;
             this.txtBaseDeDatos.Size = new System.Drawing.Size(182, 26);
-            this.txtBaseDeDatos.TabIndex = 1;
+            this.txtBaseDeDatos.TabIndex = 4;
             // 
             // txtArchivoVencimiento
             // 
@@ -134,7 +133,7 @@ namespace Interfaz_SaldosDiarios
             this.txtArchivoVencimiento.Name = "txtArchivoVencimiento";
             this.txtArchivoVencimiento.ReadOnly = true;
             this.txtArchivoVencimiento.Size = new System.Drawing.Size(210, 26);
-            this.txtArchivoVencimiento.TabIndex = 1;
+            this.txtArchivoVencimiento.TabIndex = 8;
             this.txtArchivoVencimiento.TextChanged += new System.EventHandler(this.textBox5_TextChanged);
             // 
             // txtArchivoSaldos
@@ -143,7 +142,7 @@ namespace Interfaz_SaldosDiarios
             this.txtArchivoSaldos.Name = "txtArchivoSaldos";
             this.txtArchivoSaldos.ReadOnly = true;
             this.txtArchivoSaldos.Size = new System.Drawing.Size(210, 26);
-            this.txtArchivoSaldos.TabIndex = 1;
+            this.txtArchivoSaldos.TabIndex = 7;
             this.txtArchivoSaldos.TextChanged += new System.EventHandler(this.textBox5_TextChanged);
             // 
             // txtServidorTicket
@@ -152,7 +151,7 @@ namespace Interfaz_SaldosDiarios
             this.txtServidorTicket.Name = "txtServidorTicket";
             this.txtServidorTicket.ReadOnly = true;
             this.txtServidorTicket.Size = new System.Drawing.Size(182, 26);
-            this.txtServidorTicket.TabIndex = 1;
+            this.txtServidorTicket.TabIndex = 3;
             // 
             // label4
             // 
@@ -196,7 +195,6 @@ namespace Interfaz_SaldosDiarios
             this.groupBox2.Controls.Add(this.btnCargaSaldos);
             this.groupBox2.Controls.Add(this.txtFechaArchivos);
             this.groupBox2.Controls.Add(this.label14);
-            this.groupBox2.Controls.Add(this.label13);
             this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.txtStatusInterfaz);
             this.groupBox2.Controls.Add(this.txtFechaProceso);
@@ -209,16 +207,17 @@ namespace Interfaz_SaldosDiarios
             // 
             // btnSalir
             // 
-            this.btnSalir.Location = new System.Drawing.Point(476, 102);
+            this.btnSalir.Location = new System.Drawing.Point(487, 63);
             this.btnSalir.Name = "btnSalir";
             this.btnSalir.Size = new System.Drawing.Size(149, 36);
             this.btnSalir.TabIndex = 6;
             this.btnSalir.Text = "Salir";
             this.btnSalir.UseVisualStyleBackColor = true;
+            this.btnSalir.Click += new System.EventHandler(this.btnSalir_Click);
             // 
             // btnCargaSaldos
             // 
-            this.btnCargaSaldos.Location = new System.Drawing.Point(476, 63);
+            this.btnCargaSaldos.Location = new System.Drawing.Point(487, 24);
             this.btnCargaSaldos.Name = "btnCargaSaldos";
             this.btnCargaSaldos.Size = new System.Drawing.Size(149, 33);
             this.btnCargaSaldos.TabIndex = 6;
@@ -231,7 +230,7 @@ namespace Interfaz_SaldosDiarios
             this.txtFechaArchivos.Location = new System.Drawing.Point(196, 73);
             this.txtFechaArchivos.Name = "txtFechaArchivos";
             this.txtFechaArchivos.Size = new System.Drawing.Size(233, 26);
-            this.txtFechaArchivos.TabIndex = 5;
+            this.txtFechaArchivos.TabIndex = 2;
             // 
             // label14
             // 
@@ -241,15 +240,6 @@ namespace Interfaz_SaldosDiarios
             this.label14.Size = new System.Drawing.Size(168, 20);
             this.label14.TabIndex = 4;
             this.label14.Text = "Fecha de los Archivos:";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(463, 26);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(91, 20);
-            this.label13.TabIndex = 3;
-            this.label13.Text = "dd-mm-yyyy";
             // 
             // label8
             // 
@@ -270,10 +260,14 @@ namespace Interfaz_SaldosDiarios
             // 
             // txtFechaProceso
             // 
+            this.txtFechaProceso.ForeColor = System.Drawing.Color.Gray;
             this.txtFechaProceso.Location = new System.Drawing.Point(196, 26);
             this.txtFechaProceso.Name = "txtFechaProceso";
             this.txtFechaProceso.Size = new System.Drawing.Size(233, 26);
             this.txtFechaProceso.TabIndex = 1;
+            this.txtFechaProceso.Text = "dd-mm-yyyy";
+            this.txtFechaProceso.Enter += new System.EventHandler(this.txtFechaProceso_Enter);
+            this.txtFechaProceso.Leave += new System.EventHandler(this.txtFechaProceso_Leave);
             // 
             // label7
             // 
@@ -417,7 +411,6 @@ namespace Interfaz_SaldosDiarios
         private System.Windows.Forms.Button btnCargaSaldos;
         private System.Windows.Forms.TextBox txtFechaArchivos;
         private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox txtConsola;
     }
 }

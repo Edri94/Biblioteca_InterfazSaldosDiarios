@@ -3,4 +3,3 @@ C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Biblioteca_Interf
 C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Biblioteca_InterfazSaldosDiarios\obj\Debug\Biblioteca_InterfazSaldosDiarios.csproj.CoreCompileInputs.cache
 C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Biblioteca_InterfazSaldosDiarios\obj\Debug\Biblioteca_InterfazSaldosDiarios.dll
 C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Biblioteca_InterfazSaldosDiarios\obj\Debug\Biblioteca_InterfazSaldosDiarios.pdb
-C:\Users\MI05332\source\repos\Biblioteca_InterfazSaldosDiarios\Biblioteca_InterfazSaldosDiarios\obj\Debug\Biblioteca_InterfazSaldosDiarios.csproj.AssemblyReference.cache

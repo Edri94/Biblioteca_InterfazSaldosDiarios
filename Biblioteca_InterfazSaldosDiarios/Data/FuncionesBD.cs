@@ -232,6 +232,28 @@ namespace Biblioteca_InterfazSaldosDiarios.Data
             return afectados;
 
         }
+
+        public string obtenerFechaServidor()
+        {
+            try
+            {
+                string query = "select convert(varchar, GETDATE(), 105) as [fecha_actual]";
+                SqlDataReader dr = ejecutarConsulta(query);
+
+                string fecha_actual = string.Empty;
+                
+                while(dr.Read())
+                {
+                    fecha_actual = dr.GetString(0);
+                }
+                dr.Close();
+                return fecha_actual;
+            }
+            catch (Exception ex)
+            {
+                return string.Empty;
+            }
+        }
     }
 
 
