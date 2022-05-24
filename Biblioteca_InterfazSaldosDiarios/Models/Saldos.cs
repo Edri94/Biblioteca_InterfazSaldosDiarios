@@ -11,7 +11,7 @@ namespace Biblioteca_InterfazSaldosDiarios.Models
         public string Agencia { get; set; }
         public string NumCuenta { get; set; }
         public string SufijoCuenta { get; set; }
-        public float SaldoIniDia { get; set; }
+        public decimal SaldoIniDia { get; set; }
         public int InteresDia { get; set; }
         public string SwitchBloqueo { get; set; }
         public DateTime FechaGenSaldo { get; set; }

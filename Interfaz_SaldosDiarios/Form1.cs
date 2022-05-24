@@ -217,14 +217,19 @@ namespace Interfaz_SaldosDiarios
 
                         while (dr.Read())
                         {
+                            //if (Funcion.Left(dr.GetString(1) + Funcion.Space(6), 6).Contains("225300"))
+                            //{
+                            //    bool encontrado = true;
+                            //    var saldo = dr.GetDecimal(3);
+                            //}
                             switch (TipoInfo)
-                            {
+                            {                              
                                 case 1:
                                     Saldos saldo = new Saldos();
                                     saldo.Agencia = Funcion.Left(dr.GetString(0) + Funcion.Space(4), 4);
                                     saldo.NumCuenta = Funcion.Left(dr.GetString(1) + Funcion.Space(6), 6);
                                     saldo.SufijoCuenta = Funcion.Left(dr.GetString(2) + Funcion.Space(3), 3);
-                                    saldo.SaldoIniDia = dr.GetFloat(3);
+                                    saldo.SaldoIniDia = dr.GetDecimal(3);
                                     saldo.InteresDia = dr.GetInt32(4);
                                     saldo.SwitchBloqueo = dr.GetString(5);
                                     saldo.FechaGenSaldo = DateTime.Parse(Funcion.InvierteFecha(dr.GetString(6), false));
@@ -244,7 +249,7 @@ namespace Interfaz_SaldosDiarios
                                     vencim.Agencia = dr.GetString(1);
                                     vencim.NumCuenta = dr.GetString(2);
                                     vencim.SufijoCuenta = dr.GetString(3);
-                                    vencim.Saldo = dr.GetFloat(4);
+                                    vencim.Saldo = dr.GetDecimal(4);
                                     vencim.FechaVen = DateTime.Parse(Funcion.InvierteFecha(dr.GetString(5),false));
                                     vencim.NumRegistros = dr.GetInt32(6);
                                     vencim.Intereses = dr.GetFloat(7);
@@ -361,6 +366,7 @@ namespace Interfaz_SaldosDiarios
                     lnIndice = 0;
                     Message("Cargando Archivo de Saldos de Houston...");
 
+
                     do
                     {
                         lsQuery = "INSERT INTO TICKET.Transferencia.SALDOS_KAPITI_1(agencia, cuenta_cliente, sufijo, saldo, interes, cuenta_bloqueada, fecha_generacion, numero_registros, fin_registro) VALUES (@agencia, @cuenta_cliente, @sufijo, @saldo, @interes, @cuenta_bloqueada, @fecha_generacion, @numero_registros, @fin_registro);";
@@ -368,12 +374,12 @@ namespace Interfaz_SaldosDiarios
                         SqlParameter[] parameters = new SqlParameter[] {
                                 new SqlParameter("@agencia",SqlDbType.VarChar, 4) { Value = cargaSaldo[lnIndice].Agencia.ToString() },
                                 new SqlParameter("@cuenta_cliente",SqlDbType.VarChar, 6) { Value = cargaSaldo[lnIndice].NumCuenta.ToString() },
-                                new SqlParameter("@sufijo",SqlDbType.VarChar, 3) { Value = cargaSaldo[lnIndice].SufijoCuenta.ToString() },
+                                new SqlParameter("@sufijo",SqlDbType.VarChar, 3) { Value = cargaSaldo[lnIndice].SufijoCuenta.ToString()},
                                 new SqlParameter("@saldo",SqlDbType.VarChar, 17) { Value = cargaSaldo[lnIndice].SaldoIniDia.ToString() },
                                 new SqlParameter("@interes",SqlDbType.VarChar, 11) { Value = cargaSaldo[lnIndice].InteresDia.ToString() },
                                 new SqlParameter("@cuenta_bloqueada",SqlDbType.VarChar, 1) { Value = cargaSaldo[lnIndice].SwitchBloqueo.ToString() },
-                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 10) { Value = cargaSaldo[lnIndice].FechaGenSaldo.ToString() },
-                                new SqlParameter("@numero_registros",SqlDbType.VarChar, 8) { Value = cargaSaldo[lnIndice].NumRegistros.ToString() },
+                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 10) { Value = cargaSaldo[lnIndice].FechaGenSaldo.ToString("MM-dd-yyyy") },
+                                new SqlParameter("@numero_registros",SqlDbType.VarChar, 8) { Value = cargaSaldo[lnIndice].NumRegistros.ToString()},
                                 new SqlParameter("@fin_registro",SqlDbType.VarChar, 1) { Value = cargaSaldo[lnIndice].FinRegistro.ToString() },
                         };
 
@@ -415,7 +421,7 @@ namespace Interfaz_SaldosDiarios
                                 new SqlParameter("@cuenta_cliente",SqlDbType.VarChar, 6) { Value = cargaVenc[lnIndice].NumCuenta.ToString() },
                                 new SqlParameter("@sufijo",SqlDbType.VarChar, 3) { Value = cargaVenc[lnIndice].SufijoCuenta.ToString() },
                                 new SqlParameter("@saldo",SqlDbType.VarChar, 17) { Value = cargaVenc[lnIndice].Saldo.ToString() },
-                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 10) { Value = cargaVenc[lnIndice].FechaVen.ToString() },
+                                new SqlParameter("@fecha_generacion",SqlDbType.VarChar, 10) { Value = cargaVenc[lnIndice].FechaVen.ToString("MM-dd-yyyy") },
                                 new SqlParameter("@numero_registros",SqlDbType.VarChar, 8) { Value = cargaVenc[lnIndice].NumRegistros.ToString() },
                                 new SqlParameter("@intereses",SqlDbType.VarChar, 17) { Value = cargaVenc[lnIndice].Intereses.ToString() },
                                 new SqlParameter("@fin_registro",SqlDbType.VarChar, 1) { Value = cargaVenc[lnIndice].FinRegistro.ToString() },
@@ -686,8 +692,12 @@ namespace Interfaz_SaldosDiarios
                             {
                                 return IntegrityFile;
                             }
-                            //Cuenta Cliente
-                            cuenta_cliente = laSaldos[noRegistros].Agencia.Trim();
+                            //Cuenta Cliente                          
+                            cuenta_cliente = laSaldos[noRegistros].NumCuenta.Trim();
+                            //if (cuenta_cliente.Contains("225300"))
+                            //{
+                            //    bool bandera = true;
+                            //}
 
                             if (cuenta_cliente == "" || !IsNumeric(cuenta_cliente))
                             {
@@ -699,16 +709,16 @@ namespace Interfaz_SaldosDiarios
                             {
                                 return IntegrityFile;
                             }
-                            ////Saldo
-                            //saldo = laSaldos[noRegistros].SaldoIniDia.ToString();
-                            //saldo = saldo.Replace(" -.", "-0."); // Línea que corrige el problema de los números negativos
+                            //Saldo
+                            saldo = laSaldos[noRegistros].SaldoIniDia.ToString();
+                            saldo = saldo.Replace(" -.", "-0."); // Línea que corrige el problema de los números negativos
                             //if (saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14).Trim() != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
                             //{
                             //    return IntegrityFile;
                             //}
-                            ////Interes
-                            //interes = laSaldos[noRegistros].InteresDia.ToString();
-                            //interes = interes.Replace(" -.", "-0.");
+                            //Interes
+                            interes = laSaldos[noRegistros].InteresDia.ToString();
+                            interes = interes.Replace(" -.", "-0.");
                             //if (interes.Trim() == "" || (!IsNumeric(Funcion.Mid(interes, 1, 14)) && Funcion.Mid(interes, 1, 14) != "") || !IsNumeric(Funcion.Mid(interes, 16, 2)) || Funcion.Mid(interes, 15, 1) != ".")
                             //{
                             //    return IntegrityFile;
@@ -824,7 +834,7 @@ namespace Interfaz_SaldosDiarios
 
                             ////Saldo
                             saldo = laVencim[noRegistros].Saldo.ToString();
-                            //saldo = saldo.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
+                            saldo = saldo.Replace(" -.", "-0."); //Línea que corrige el problema de los números negativos
 
                             //if(saldo == "" || (!IsNumeric(Funcion.Mid(saldo, 1, 14)) && Funcion.Mid(saldo, 1, 14) != "") || !IsNumeric(Funcion.Mid(saldo, 16, 2)) || Funcion.Mid(saldo, 15, 1) != ".")
                             //{
