@@ -3,6 +3,7 @@ using Biblioteca_InterfazSaldosDiarios.Helpers;
 using Biblioteca_InterfazSaldosDiarios.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.Odbc;
 using System.Data.SqlClient;
@@ -43,16 +44,11 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
          
         public string Fecha_Int;
 
-        bool mbConexion;
-        bool conectado;
-
         byte mnFirstTime;
 
-        string msSQL;
         string msSQL400;
         int mnBanderaSHO;
         int mnBanderaVHO;
-        string msPathFile;
 
         List<Saldos> maSaldos;
         List<Vencim> maVencimientos;
@@ -76,11 +72,21 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
         TextBox txtArchivoSaldos;
         TextBox txtArchivoVencimiento;
         TextBox txtFechaArchivos;
+        ProgressBar pgbrSaldosBD;
+        ProgressBar pgbrVencimientosBD;
+
+        BackgroundWorker trabajador1, trabajador2;
+
+        List<QueryParametro> querys;
+
+        int total_saldos = 0, total_vencim = 0;
+
+        int tipo_activo = 0;
 
         public string Ls_fechaoperacion { get => ls_fechaoperacion; set => ls_fechaoperacion = value; }
         public byte MnFirstTime { get => mnFirstTime; set => mnFirstTime = value; }
 
-        public Main(ref TextBox txtConsola, ref ProgressBar pgbrCargaSaldos, ref ProgressBar pgbrCargaVencimientos, ref TextBox txtStatusInterfaz, ref Label lblNumSaldosHO, ref Label lblNumVencimHO, ref TextBox txtArchivoSaldos, ref TextBox txtArchivoVencimiento, ref TextBox txtFechaArchivos)
+        public Main(ref TextBox txtConsola, ref ProgressBar pgbrCargaSaldos, ref ProgressBar pgbrCargaVencimientos, ref TextBox txtStatusInterfaz, ref Label lblNumSaldosHO, ref Label lblNumVencimHO, ref TextBox txtArchivoSaldos, ref TextBox txtArchivoVencimiento, ref TextBox txtFechaArchivos, ref ProgressBar pgbrSaldosBD, ref ProgressBar pgbrVencimientosBD)
         {
             this.txtConsola = txtConsola;
             this.pgbrCargaSaldos = pgbrCargaSaldos;
@@ -91,6 +97,8 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
             this.txtArchivoSaldos = txtArchivoSaldos;
             this.txtArchivoVencimiento = txtArchivoVencimiento;         
             this.txtFechaArchivos = txtFechaArchivos;
+            this.pgbrSaldosBD = pgbrSaldosBD;
+            this.pgbrVencimientosBD = pgbrVencimientosBD;
 
             encriptacion = new Encriptacion();
         }
@@ -365,13 +373,25 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
 
         public void Message(string mensaje)
         {
-            txtConsola.AppendText("$ " + mensaje);
-            txtConsola.AppendText(Environment.NewLine);
+            if (txtConsola.InvokeRequired)
+            {
+                txtConsola.Invoke(new MethodInvoker(delegate
+                {
+                    txtConsola.AppendText("$ " + mensaje);
+                    txtConsola.AppendText(Environment.NewLine);
+                }));
+            }
+            else
+            {
+                txtConsola.AppendText("$ " + mensaje);
+                txtConsola.AppendText(Environment.NewLine);
+            }
         }
 
         private bool ProcesaInfo(int TipoInfo)
         {
-            //TipoInfo = 2;
+            tipo_activo = TipoInfo;
+
             int lnDatos;
             int lnContador;
             int lnNumRegistros;
@@ -973,7 +993,7 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
             int lnIndice = 0;
             string lsQuery;
             bool CargaArchivosHO = false;
-            List<QueryParametro> querys = new List<QueryParametro>();
+            querys = new List<QueryParametro>();
 
             try
             {
@@ -1010,12 +1030,26 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
                     } while (lnIndice <= NumRegistros);
 
                     txtStatusInterfaz.Text = "Cargando Saldos a la base de datos";
-                    CargaArchivosHO = (transaccionInsert(querys, ref pgbrCargaSaldos) != -1) ? true : false;
 
-                    //Task.Run(async () =>
-                    //{
-                    //    CargaArchivosHO = (await Task.Run(() => bd.transaccionInsert(querys)) > 1)? true: false;
-                    //}).GetAwaiter().GetResult();
+
+                    //Programacion MULTIHILOS SALDOS*************************************************************************
+                    trabajador1 = new BackgroundWorker
+                    {
+                        WorkerReportsProgress = true,
+                        WorkerSupportsCancellation = true
+                    };
+
+                    total_saldos = querys.Count();
+
+                    trabajador1.DoWork += transaccionInsertSaldos;
+                    trabajador1.ProgressChanged += ProgresoSaldos;
+                    trabajador1.RunWorkerCompleted += FinalizadoSaldos;
+
+                    trabajador1.RunWorkerAsync("Inicia el trabajo");
+
+                    //CargaArchivosHO = (transaccionInsert(querys, ref pgbrCargaSaldos) != -1) ? true : false;
+
+                    //*************************************************************************************************
 
 
                     lblNumSaldosHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
@@ -1054,7 +1088,26 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
                     } while (lnIndice <= NumRegistros);
 
                     txtStatusInterfaz.Text = "Cargando Vencimientos a la base de datos";
-                    CargaArchivosHO = (transaccionInsert(querys, ref pgbrCargaVencimientos) != -1) ? true : false;
+
+                    //Programacion MULTIHILOS Vencimientos*************************************************************************
+                    trabajador2 = new BackgroundWorker
+                    {
+                        WorkerReportsProgress = true,
+                        WorkerSupportsCancellation = true
+                    };
+
+                    total_vencim = querys.Count();
+
+                    trabajador2.DoWork += transaccionInsertVencim;
+                    trabajador2.ProgressChanged += ProgresoVencim;
+                    trabajador2.RunWorkerCompleted += FinalizadoVencim;
+
+                    trabajador2.RunWorkerAsync("Inicia el trabajo");
+
+                    //CargaArchivosHO = (transaccionInsert(querys, ref pgbrCargaVencimientos) != -1) ? true : false;
+
+                    //*************************************************************************************************
+
 
                     lblNumVencimHO.Text = $"Registros procesados: {lnIndice.ToString("00000")}";
                     Message("Carga de Vencimientos de Houston Terminada...");
@@ -1067,6 +1120,199 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
                 return CargaArchivosHO;
             }
         }
+
+        public void transaccionInsertSaldos(object sender, DoWorkEventArgs e)
+        {
+            int registros_procesados = 0, sumatoria = 0;
+            using (SqlConnection connection = new SqlConnection(bd.connectionString))
+            {
+                connection.Open();
+
+                SqlCommand command = connection.CreateCommand();
+                SqlTransaction transaction;
+
+                transaction = connection.BeginTransaction("transaccionInsertSaldos");
+
+                command.Connection = connection;
+                command.Transaction = transaction;
+
+                try
+                {
+
+                    foreach (QueryParametro query in querys)
+                    {
+                        Message($"Cargando el saldo {registros_procesados}  a la base de datos");
+
+                        command.Parameters.Clear();
+                        command.CommandText = query.Query;
+                        foreach (SqlParameter parametro in query.Parametros)
+                        {
+                            command.Parameters.Add(parametro);
+                        }
+
+                        registros_procesados++;
+                        sumatoria += registros_procesados;
+                      
+
+                        command.ExecuteNonQuery();
+                        trabajador1.ReportProgress(registros_procesados);
+                        //ActualizaProgreso(ref pgbr, 30, registros_procesados, querys.Count, 70);
+                    }
+                    transaction.Commit();
+                    e.Result = sumatoria;
+                    Log.Escribe("records are written to database.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Escribe("Commit Exception");
+                    Log.Escribe(ex);
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception ex2)
+                    {
+                        Log.Escribe("Rollback Exception");
+                    }
+                }
+            }
+        }
+
+        public void ProgresoSaldos(object sender, ProgressChangedEventArgs e)
+        {
+            int porcentaje = (e.ProgressPercentage * 100) / total_saldos;
+
+            if (porcentaje % 1 == 0)
+            {
+
+                if (pgbrSaldosBD.InvokeRequired)
+                {
+                    pgbrSaldosBD.Invoke(new MethodInvoker(delegate
+                    {
+                        pgbrSaldosBD.Value = porcentaje;
+                    }));
+                }
+                else
+                {
+                    pgbrSaldosBD.Value = porcentaje;
+                }
+            }
+        }
+
+        public void FinalizadoSaldos(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+            {
+                Message("se ha cancelado el trabajo");
+            }
+            else if (e.Error != null)
+            {
+                Message($"Hubo un problema {e.Error.ToString()}");
+            }
+            else
+            {
+                Message(" Trabajo terminado");
+                Message(e.Result.ToString());
+            }
+
+        }
+
+        public void transaccionInsertVencim(object sender, DoWorkEventArgs e)
+        {
+            int registros_procesados = 0, sumatoria = 0;
+            using (SqlConnection connection = new SqlConnection(bd.connectionString))
+            {
+                connection.Open();
+
+                SqlCommand command = connection.CreateCommand();
+                SqlTransaction transaction;
+
+                transaction = connection.BeginTransaction("transaccionInsertVencimientos");
+
+                command.Connection = connection;
+                command.Transaction = transaction;
+
+                try
+                {
+
+                    foreach (QueryParametro query in querys)
+                    {
+                        Message($"Cargando el Vencimiento {registros_procesados}  a la base de datos");
+
+                        command.Parameters.Clear();
+                        command.CommandText = query.Query;
+                        foreach (SqlParameter parametro in query.Parametros)
+                        {
+                            command.Parameters.Add(parametro);
+                        }
+
+                        registros_procesados++;
+                        sumatoria += registros_procesados;
+                        
+
+                        command.ExecuteNonQuery();
+                        trabajador2.ReportProgress(registros_procesados);
+                        //ActualizaProgreso(ref pgbr, 30, registros_procesados, querys.Count, 70);
+                    }
+                    transaction.Commit();
+                    e.Result = sumatoria;
+                    Log.Escribe("records are written to database.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Escribe("Commit Exception");
+                    Log.Escribe(ex);
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception ex2)
+                    {
+                        Log.Escribe("Rollback Exception");
+                    }
+                }
+            }
+        }
+
+        public void ProgresoVencim(object sender, ProgressChangedEventArgs e)
+        {
+            int porcentaje = (e.ProgressPercentage * 100) / total_vencim;
+
+            if (porcentaje % 1 == 0)
+            {
+
+                if (pgbrVencimientosBD.InvokeRequired)
+                {
+                    pgbrVencimientosBD.Invoke(new MethodInvoker(delegate
+                    {
+                        pgbrVencimientosBD.Value = porcentaje;
+                    }));
+                }
+                else
+                {
+                    pgbrVencimientosBD.Value = porcentaje;
+                }
+            }
+        }
+
+        public void FinalizadoVencim(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+            {
+                Message("se ha cancelado el trabajo");
+            }
+            else if (e.Error != null)
+            {
+                Message($"Hubo un problema {e.Error.ToString()}");
+            }
+            else
+            {
+                Message(" Trabajo terminado");
+                Message(e.Result.ToString());
+            }
+
+        }
+
 
         public int transaccionInsert(List<QueryParametro> querys, ref ProgressBar pgbr)
         {

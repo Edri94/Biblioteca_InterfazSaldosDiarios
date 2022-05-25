@@ -41,7 +41,7 @@ namespace Interfaz_SaldosDiarios
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            main = new Main(ref txtConsola, ref pgbrCargaSaldos, ref pgbrCargaVencimientos, ref txtStatusInterfaz, ref lblNumSaldosHO, ref lblNumVencimHO, ref txtArchivoSaldos, ref txtArchivoVencimiento,  ref txtFechaArchivos);
+            main = new Main(ref txtConsola, ref pgbrCargaSaldos, ref pgbrCargaVencimientos, ref txtStatusInterfaz, ref lblNumSaldosHO, ref lblNumVencimHO, ref txtArchivoSaldos, ref txtArchivoVencimiento,  ref txtFechaArchivos, ref pgbrSaldosBD, ref pgbrVencimientosBD);
 
             main.EstableceParametros();
             PintarParametros();

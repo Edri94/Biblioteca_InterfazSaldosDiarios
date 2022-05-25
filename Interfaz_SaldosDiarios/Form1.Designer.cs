@@ -59,6 +59,10 @@ namespace Interfaz_SaldosDiarios
             this.pgbrCargaSaldos = new System.Windows.Forms.ProgressBar();
             this.label9 = new System.Windows.Forms.Label();
             this.txtConsola = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.pgbrVencimientosBD = new System.Windows.Forms.ProgressBar();
+            this.label12 = new System.Windows.Forms.Label();
+            this.pgbrSaldosBD = new System.Windows.Forms.ProgressBar();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -280,6 +284,10 @@ namespace Interfaz_SaldosDiarios
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.label11);
+            this.groupBox3.Controls.Add(this.pgbrVencimientosBD);
+            this.groupBox3.Controls.Add(this.label12);
+            this.groupBox3.Controls.Add(this.pgbrSaldosBD);
             this.groupBox3.Controls.Add(this.lblNumVencimHO);
             this.groupBox3.Controls.Add(this.lblNumSaldosHO);
             this.groupBox3.Controls.Add(this.label10);
@@ -288,7 +296,7 @@ namespace Interfaz_SaldosDiarios
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Location = new System.Drawing.Point(12, 424);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(669, 150);
+            this.groupBox3.Size = new System.Drawing.Size(669, 210);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Carga de Informacion AS400 >> TKT";
@@ -296,7 +304,7 @@ namespace Interfaz_SaldosDiarios
             // lblNumVencimHO
             // 
             this.lblNumVencimHO.AutoSize = true;
-            this.lblNumVencimHO.Location = new System.Drawing.Point(339, 109);
+            this.lblNumVencimHO.Location = new System.Drawing.Point(339, 91);
             this.lblNumVencimHO.Name = "lblNumVencimHO";
             this.lblNumVencimHO.Size = new System.Drawing.Size(161, 20);
             this.lblNumVencimHO.TabIndex = 4;
@@ -305,7 +313,7 @@ namespace Interfaz_SaldosDiarios
             // lblNumSaldosHO
             // 
             this.lblNumSaldosHO.AutoSize = true;
-            this.lblNumSaldosHO.Location = new System.Drawing.Point(7, 109);
+            this.lblNumSaldosHO.Location = new System.Drawing.Point(7, 91);
             this.lblNumSaldosHO.Name = "lblNumSaldosHO";
             this.lblNumSaldosHO.Size = new System.Drawing.Size(160, 20);
             this.lblNumSaldosHO.TabIndex = 3;
@@ -322,14 +330,14 @@ namespace Interfaz_SaldosDiarios
             // 
             // pgbrCargaVencimientos
             // 
-            this.pgbrCargaVencimientos.Location = new System.Drawing.Point(343, 80);
+            this.pgbrCargaVencimientos.Location = new System.Drawing.Point(343, 62);
             this.pgbrCargaVencimientos.Name = "pgbrCargaVencimientos";
             this.pgbrCargaVencimientos.Size = new System.Drawing.Size(308, 23);
             this.pgbrCargaVencimientos.TabIndex = 1;
             // 
             // pgbrCargaSaldos
             // 
-            this.pgbrCargaSaldos.Location = new System.Drawing.Point(11, 80);
+            this.pgbrCargaSaldos.Location = new System.Drawing.Point(11, 62);
             this.pgbrCargaSaldos.Name = "pgbrCargaSaldos";
             this.pgbrCargaSaldos.Size = new System.Drawing.Size(308, 23);
             this.pgbrCargaSaldos.TabIndex = 1;
@@ -348,20 +356,52 @@ namespace Interfaz_SaldosDiarios
             this.txtConsola.BackColor = System.Drawing.SystemColors.MenuText;
             this.txtConsola.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtConsola.ForeColor = System.Drawing.Color.LawnGreen;
-            this.txtConsola.Location = new System.Drawing.Point(12, 595);
+            this.txtConsola.Location = new System.Drawing.Point(12, 640);
             this.txtConsola.Multiline = true;
             this.txtConsola.Name = "txtConsola";
             this.txtConsola.ReadOnly = true;
             this.txtConsola.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtConsola.Size = new System.Drawing.Size(669, 100);
+            this.txtConsola.Size = new System.Drawing.Size(669, 192);
             this.txtConsola.TabIndex = 3;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(339, 133);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(279, 20);
+            this.label11.TabIndex = 9;
+            this.label11.Text = "Carga en base de datos Vencimientos";
+            // 
+            // pgbrVencimientosBD
+            // 
+            this.pgbrVencimientosBD.Location = new System.Drawing.Point(339, 159);
+            this.pgbrVencimientosBD.Name = "pgbrVencimientosBD";
+            this.pgbrVencimientosBD.Size = new System.Drawing.Size(308, 34);
+            this.pgbrVencimientosBD.TabIndex = 7;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(11, 133);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(232, 20);
+            this.label12.TabIndex = 10;
+            this.label12.Text = "Carga en base de datos Saldos";
+            // 
+            // pgbrSaldosBD
+            // 
+            this.pgbrSaldosBD.Location = new System.Drawing.Point(11, 159);
+            this.pgbrSaldosBD.Name = "pgbrSaldosBD";
+            this.pgbrSaldosBD.Size = new System.Drawing.Size(308, 34);
+            this.pgbrSaldosBD.TabIndex = 8;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(693, 707);
+            this.ClientSize = new System.Drawing.Size(693, 844);
             this.Controls.Add(this.txtConsola);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -412,6 +452,10 @@ namespace Interfaz_SaldosDiarios
         private System.Windows.Forms.TextBox txtFechaArchivos;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox txtConsola;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.ProgressBar pgbrVencimientosBD;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.ProgressBar pgbrSaldosBD;
     }
 }
 
