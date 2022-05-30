@@ -83,6 +83,8 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
 
         int tipo_activo = 0;
 
+        bool fecha_actual;
+
         public string Ls_fechaoperacion { get => ls_fechaoperacion; set => ls_fechaoperacion = value; }
         public byte MnFirstTime { get => mnFirstTime; set => mnFirstTime = value; }
 
@@ -105,6 +107,8 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
 
         public void Init(bool fecha_actual, string fecha = "")
         {
+            this.fecha_actual = fecha_actual;
+
             if (EstableceConexionBD() == true && as400.Conectar() == true)
             {
                 if (!fecha_actual)
@@ -228,8 +232,11 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
                 maps = bd.LLenarMapToQuery(maps, dr);
 
 
-                ls_FechaDiaActual = Funcion.InvierteFecha(maps[0].GetString(), false);
+                ls_FechaDiaActual = Funcion.InvierteFecha(maps[0].GetString(), false);   
                 Fecha_Int = DateTime.Parse(ls_fechaoperacion).ToString("MM-dd-yyyy");
+                
+
+                
 
                 //Verifica si hoy es festivo...
                 string tmp_fecha = DateTime.Parse(ls_fechaoperacion).ToString("yyyy-MM-dd") + " 00:00:00.000";
@@ -527,7 +534,7 @@ namespace Biblioteca_InterfazSaldosDiarios.Processes
 
                             case 1:
                                 txtStatusInterfaz.Text = "Verificando integridad de los saldos...";
-                                if (IntegrityFile(maSaldos, maVencimientos, Funcion.InvierteFecha(Fecha_Int, false), TipoInfo, lnContador))
+                                if (IntegrityFile(maSaldos, maVencimientos, Funcion.InvierteFecha(gsFechaArchivo, false), TipoInfo, lnContador))
                                 {
                                     if (!LimpiaTablasSV(TipoInfo))
                                     {

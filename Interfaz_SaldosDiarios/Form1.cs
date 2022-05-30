@@ -41,6 +41,10 @@ namespace Interfaz_SaldosDiarios
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            Log.EscribeLog = (Funcion.getValueAppConfig("Escribe", "LOG") == "1") ? true : false;
+            Log.RutaLog = Funcion.getValueAppConfig("Ruta", "LOG");
+            Log.Escribe("Iniciando ");
+            
             main = new Main(ref txtConsola, ref pgbrCargaSaldos, ref pgbrCargaVencimientos, ref txtStatusInterfaz, ref lblNumSaldosHO, ref lblNumVencimHO, ref txtArchivoSaldos, ref txtArchivoVencimiento,  ref txtFechaArchivos, ref pgbrSaldosBD, ref pgbrVencimientosBD);
 
             main.EstableceParametros();
